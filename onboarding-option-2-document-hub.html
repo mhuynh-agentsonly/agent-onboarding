@@ -283,7 +283,7 @@ function docView(){
   h+='<div class="sig"><h2>Contractor Signature</h2><label class="lb">Full name</label>'+
      '<input type="text" value="'+d.name+'" placeholder="Olivia O.J Rhye" oninput="setName(this.value)">'+
      '<label class="chk"><input type="checkbox" '+(d.agreed?'checked':'')+' onchange="setAgree(this.checked)"><span>I have read and accepted the '+d.title+'.</span></label></div>';
-  var lbl=d.signed?'Done':((nx>=0&&nx!==S.i)?'Sign and continue':'Sign document');
+  var lbl=(nx>=0&&nx!==S.i)?'Sign and continue':'Done';
   h+='<div class="divider"></div><div class="foot"><button class="btn sec" onclick="toHub()">Cancel</button>'+
      '<button class="btn pri" '+(ok()?'':'disabled')+' onclick="sign()">'+lbl+'</button></div>';
   return h+'</div></div></div>';
