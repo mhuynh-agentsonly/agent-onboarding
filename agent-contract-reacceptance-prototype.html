@@ -423,9 +423,11 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .signbox .ok svg{width:19px;height:19px}
 .signbox h4{margin:0 0 6px;font-size:17px;font-weight:700}
 .signbox p{margin:0 0 16px;font-size:13.5px;color:var(--ink2);line-height:1.5}
-.signbox label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
-.signbox input{width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:10px;font-size:14.5px}
-.signbox input:focus{outline:2px solid var(--teal-s);border-color:var(--teal)}
+/* Direct children only. As plain descendant selectors these also matched the checkbox row,
+   stretching the checkbox to 100% width and shoving its label out of the dialog. */
+.signbox>label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+.signbox>input{width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:10px;font-size:14.5px}
+.signbox>input:focus{outline:2px solid var(--teal-s);border-color:var(--teal)}
 .signbox .chkrow{margin-top:16px;font-size:14px;line-height:1.45}
 .signbox .row{display:flex;gap:10px;margin-top:18px}
 .signbox .row .btn{flex:1;justify-content:center}
