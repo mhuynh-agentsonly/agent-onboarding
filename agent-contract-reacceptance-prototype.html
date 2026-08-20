@@ -426,6 +426,7 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .signbox label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
 .signbox input{width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:10px;font-size:14.5px}
 .signbox input:focus{outline:2px solid var(--teal-s);border-color:var(--teal)}
+.signbox .chkrow{margin-top:16px;font-size:14px;line-height:1.45}
 .signbox .row{display:flex;gap:10px;margin-top:18px}
 .signbox .row .btn{flex:1;justify-content:center}
 
@@ -1127,10 +1128,13 @@ function signDialog(key){
   scrim(`<div class="signbox">
     <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.2 11 14.7 15.8 9.6"/></svg></div>
     <h4>Sign ${esc(d.title)}</h4>
-    <p>By entering your full name and clicking Confirm, you agree to AgentsOnly
-       ${esc(d.title)}${key==='ica'?' V'+ICA.version:''}.</p>
+    <p>Type your full name to sign ${key==='ica'?'V'+ICA.version+' of this agreement':'this document'}.</p>
     <label for="fn">Full name</label>
-    <input type="text" id="fn" autocomplete="off" oninput="document.getElementById('cf').disabled=!this.value.trim()">
+    <input type="text" id="fn" autocomplete="off" oninput="syncConfirm()">
+    <div class="chkrow">
+      <input type="checkbox" id="sgck" onchange="syncConfirm()">
+      <label for="sgck">I have read and accepted the ${esc(d.title)}.</label>
+    </div>
     <div class="row">
       <button class="btn" onclick="openDoc('${key}',AFTER_SIGN)">Cancel</button>
       <button class="btn pri" id="cf" disabled onclick="doSign('${key}')">Confirm</button>
@@ -1138,7 +1142,14 @@ function signDialog(key){
   </div>`);
   setTimeout(()=>{const f=document.getElementById('fn'); if(f) f.focus();},0);
 }
+/* Same gate as the Legal page: a typed name AND an explicit acceptance. */
+function syncConfirm(){
+  const n=document.getElementById('fn'), c=document.getElementById('sgck'), b=document.getElementById('cf');
+  if(b) b.disabled = !(n && n.value.trim() && c && c.checked);
+}
 function doSign(key){
+  const c=document.getElementById('sgck');
+  if(c && !c.checked) return;
   if(key==='ica'){
     S.icaSigned = true;
     render();   // the page behind the modal has to update too — the guide item is now gone
