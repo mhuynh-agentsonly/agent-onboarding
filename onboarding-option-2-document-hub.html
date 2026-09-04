@@ -37,7 +37,7 @@ body{
 .inset{max-width:684px;margin:0 auto}
 
 .hdr{display:flex;align-items:flex-start;justify-content:space-between;gap:20px}
-h1{font-size:30px;font-weight:700;letter-spacing:-.02em}
+h1{font-size:24px;font-weight:500;letter-spacing:-.01em}
 .pill-g{display:inline-block;background:var(--g100);color:var(--t-btn);font-size:13px;font-weight:500;padding:5px 13px;border-radius:20px;white-space:nowrap;flex:none;margin-top:5px}
 .lede{font-size:14px;color:var(--t2);margin-top:6px;line-height:1.55;max-width:660px}
 .grp{font-size:14px;color:var(--t2);margin:26px 0 10px}
@@ -110,7 +110,7 @@ input[type=text]:focus{outline:0;border-color:var(--brand);box-shadow:0 0 0 3px 
 .step .lb2{font-size:14px;font-weight:600;color:var(--t1);padding-top:4px;line-height:1.35}
 .step.now .lb2{color:var(--brand-ic)}
 .reg .form{flex:1;min-width:0}
-.reg h1{font-size:24px;margin-bottom:28px}
+.reg h1{margin-bottom:28px}
 .q{font-size:15px;font-weight:600;margin:28px 0 10px}
 .q.first{margin-top:0}
 .opt2{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--t1);padding:6px 0;cursor:pointer}
@@ -292,7 +292,7 @@ function docView(){
   var d=S.docs[S.i], n=S.docs.length, nx=nextUnsigned(S.i), single=(n===1);
   var h='<div class="card"><div class="col">';
   if(!single) h+='<div class="crumb"><a onclick="toHub()">&#8592; All documents</a><span class="pill-g">'+(S.i+1)+' of '+n+'</span></div>';
-  h+='<h1'+(single?'':' style="margin-top:18px"')+'>'+d.title+'</h1>';
+  h+='<h1 class="doct"'+(single?'':' style="margin-top:18px"')+'>'+d.title+'</h1>';
   if(nx>=0&&nx!==S.i) h+='<div class="sub">Next: '+S.docs[nx].title+'</div>';
   h+=paper(d)+pager(d);
   h+='<div class="inset">';
