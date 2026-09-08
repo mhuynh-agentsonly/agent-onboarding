@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Agent Portal — contract re-acceptance prototype</title>
+<title>Agent Portal — project contract re-acceptance (current scope)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
@@ -473,6 +473,8 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
   box-shadow:0 12px 32px rgba(16,30,50,.30);font-size:12px;flex-wrap:nowrap;
   max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}
 .strip::-webkit-scrollbar{display:none}
+.scopetag{background:rgba(11,185,138,.18);color:#7ff0cd;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:99px;white-space:nowrap}
 .strip .sl{color:#8ba0b5;padding:0 2px 0 7px;white-space:nowrap;font-weight:600;letter-spacing:.02em}
 .segwrap{display:flex;background:rgba(255,255,255,.09);border-radius:99px;padding:2px;gap:1px}
 .sb{border:0;background:transparent;color:#c3d1de;padding:6px 10px;border-radius:99px;font-size:12px;
@@ -505,108 +507,95 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 /* ============================================================
    STATE
    ============================================================ */
-const TODAY = new Date('2026-08-20T00:00:00Z');   // UTC so addDays never drifts a day in other timezones
-const SCEN = {
-  grace9:{days:9,  presigned:false},
-  grace1:{days:1,  presigned:false},
-  expired:{days:-2,presigned:false},
-  signed:{days:9,  presigned:true }
-};
-const S = {
-  scenario:'grace9', existing:false, bankTax:true, view:'home', tab:'available',
-  icaSigned:false, docs:{sow:false,nda:false}, applied:[], openKind:'available',
-  sub:'joined', sort:'new', page:1,
-  docPage:1, docKey:'ica', docVersion:null, histOpen:{}, signName:'', signChk:false, histCount:2, showAllOld:false,
-  workProject:null, taskOpen:false, due:'platform',
-  guideCol:false, gigReqs:false, openProject:null
-};
-
-/* Every version this agent personally signed, newest first. An agent only ever sees the
-   versions they were actually bound by — not everything the admin has published. */
-const HISTORY = [
-  {effective:'2025-02-01', signed:'2025-02-03'}, {effective:'2024-03-15', signed:'2024-03-18'},
-  {effective:'2023-09-11', signed:'2023-09-14'}, {effective:'2023-04-03', signed:'2023-04-05'},
-  {effective:'2022-10-17', signed:'2022-10-20'}, {effective:'2022-05-09', signed:'2022-05-12'},
-  {effective:'2021-11-22', signed:'2021-11-24'}, {effective:'2021-06-07', signed:'2021-06-09'},
-  {effective:'2020-12-14', signed:'2020-12-16'}, {effective:'2020-07-06', signed:'2020-07-08'},
-  {effective:'2019-12-02', signed:'2019-12-04'}, {effective:'2019-05-20', signed:'2019-05-22'},
-  {effective:'2018-11-08', signed:'2018-11-10'}, {effective:'2018-04-16', signed:'2018-04-18'}
-];
-/* Client contracts get a platform-set review window rather than a per-client date — no client
-   input needed, and every contract row can then badge a deadline consistently. */
-const PDOC_WINDOW = 14;
-const pdocDue      = d => addDays(new Date(d.effective+'T00:00:00Z'), PDOC_WINDOW);
-const pdocDaysLeft = d => Math.round((new Date(pdocDue(d)+'T00:00:00Z') - TODAY)/86400000);
-const pdocLabel    = d => { const n=pdocDaysLeft(d);
-  return n<0 ? 'Overdue' : n+(n===1?' day left':' days left'); };
-const pdocSub      = d => (pdocDaysLeft(d)<0 ? 'Was due ' : 'Due ')+fmt(pdocDue(d));
-const PREV_INLINE   = 3;    // rows shown before the second disclosure
-const YEAR_GROUP_AT = 10;   // more than this many rows, and the years become the index
-const ICA = {key:'ica', title:'Independent Contractor Agreement', effective:'2026-08-12'};
-/* version and previous derive from how much history this agent has, so the prototype can
-   show 2 versions or 14 without any other copy going stale. */
-Object.defineProperty(ICA,'version', {get(){ return S.histCount + 1; }});
-Object.defineProperty(ICA,'previous',{get(){
-  return HISTORY.slice(0,S.histCount).map((h,i)=>({v:ICA.version-1-i, ...h}));
-}});
-
+const TODAY = new Date('2026-09-08T00:00:00Z');   // UTC so addDays never drifts a day
 const fmt = iso => {
   const [y,m,d] = iso.split('-').map(Number);
   return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+y;
 };
-const addDays = (base,n) => {
-  const d = new Date(base.getTime()+n*86400000);
-  return d.toISOString().slice(0,10);
-};
-const daysLeft   = () => SCEN[S.scenario].days;
-const deadline   = () => addDays(TODAY, Math.max(daysLeft(),0));
-const icaOK      = () => S.icaSigned || SCEN[S.scenario].presigned;
-const expired    = () => daysLeft() < 0;
-/* Grace period = the requirement is not yet enforced. Expiry = the same requirement, enforced.
-   Nothing else about the screen changes. */
-const icaBlocks  = () => !icaOK() && expired();
-const icaWarns   = () => !icaOK() && !expired();
+const addDays = (base,n) => new Date(base.getTime()+n*86400000).toISOString().slice(0,10);
 
-/* Every unmet account-level prerequisite, in the order the agent should clear them.
-   These are ACCOUNT scope. Project documents are handled after Apply, not here — that
-   separation is what keeps "for all projects" and "for this project" from blurring. */
+/* CURRENT SCOPE
+   ----------------------------------------------------------------------------------
+   Client-issued project contracts only. When a client re-issues one, the agent already
+   on that project has to accept the new version.
+
+   Out of scope here, and shown in the other prototype: the platform Independent
+   Contractor Agreement, and anything specific to a brand-new agent's onboarding.
+
+   Nothing in this scope blocks work or blocks applying. It is reminders in three places:
+   the Action required widget, the ongoing project's modal, and Settings → Legal.
+*/
+const S = {
+  due:'p1', state:'grace', bankTax:true,
+  view:'home', tab:'available', sub:'joined', sort:'new', page:1,
+  docs:{sow:false,nda:false}, applied:[], openKind:'available',
+  docPage:1, docKey:'rv-sow', docVersion:null, signName:'', signChk:false,
+  histOpen:{}, showAllOld:false, workProject:null, taskOpen:false,
+  guideCol:false, openProject:null
+};
+
+/* Client contracts get a platform-set review window rather than a per-client date. */
+const PDOC_WINDOW = 14;
+const pdocDue      = d => d.due;
+const pdocDaysLeft = d => Math.round((new Date(d.due+'T00:00:00Z') - TODAY)/86400000);
+const pdocLabel    = d => { const n=pdocDaysLeft(d);
+  return n<0 ? 'Overdue' : n+(n===1?' day left':' days left'); };
+const pdocSub      = d => (pdocDaysLeft(d)<0 ? 'Was due ' : 'Due ')+fmt(pdocDue(d));
+const PREV_INLINE   = 3;
+const YEAR_GROUP_AT = 10;
+
+/* Project contracts the agent has already accepted at some version. rv-sow and qa-dha are
+   the two the client has re-issued; the Due / State controls decide which are outstanding
+   and whether they are still inside their window. */
+/* Read-only in this release: signed once, never re-issued. They are viewable so the agent
+   can go back and read what they agreed to — the same reason the project ones are. */
+const PLATFORMDOCS = [
+  {id:'ica', project:null, title:'Independent Contractor Agreement', version:1,
+   effective:'2025-02-01', pages:6, signed:true, signedOn:'2025-02-03', previous:[]},
+  {id:'bgc', project:null, title:'Background Check Consent & Criminal History Declaration',
+   version:1, effective:'2025-02-01', pages:3, signed:true, signedOn:'2025-02-03', previous:[]}
+];
+let PROJECTDOCS = [
+  {id:'im-ca',  project:'Image Moderation',  title:'Consulting Agreement', version:1,
+   effective:'2025-03-04', due:'2025-03-18', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
+  {id:'im-tou', project:'Image Moderation',  title:'Terms of Use', version:1,
+   effective:'2025-03-04', due:'2025-03-18', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
+  {id:'pz-nda', project:'Large Pizza Project', title:'Project NDA', version:1,
+   effective:'2024-11-18', due:'2024-12-02', pages:3, signed:true, signedOn:'2024-11-20', previous:[]},
+  {id:'pz-sow', project:'Large Pizza Project', title:'Statement of Work', version:1,
+   effective:'2024-11-18', due:'2024-12-02', pages:4, signed:true, signedOn:'2024-11-20', previous:[]},
+  {id:'rv-nda', project:'RV Rental Platform', title:'Project NDA', version:1,
+   effective:'2025-06-10', due:'2025-06-24', pages:3, signed:true, signedOn:'2025-06-12', previous:[]},
+  {id:'rv-sow', project:'RV Rental Platform', title:'Statement of Work', version:2,
+   effective:'2026-09-02', due:'2026-09-16', pages:4, signed:false,
+   previous:[{v:1, effective:'2025-06-10', signed:'2025-06-12'}]},
+  {id:'qa-dha', project:'Quality Assurance', title:'Data Handling Addendum', version:2,
+   effective:'2026-09-01', due:'2026-09-15', pages:3, signed:false,
+   previous:[{v:1, effective:'2025-01-20', signed:'2025-01-22'}]}
+];
+
+/* Only one account-level prerequisite is left in scope, and it is pre-existing behaviour. */
 function requirements(){
   const out = [];
-  /* Bank & tax leads: it blocks getting paid, and it is a hard block in every state,
-     whereas the agreement may still be inside its grace window. */
   if(!S.bankTax) out.push({
     key:'bt', hard:true,
     label:'Add your bank & tax information',
     sub:'Needed before you can be paid',
     scope:'all', cta:'Add bank & tax information',
-    /* The footnote sits beside the button and has to explain why it isn't "Apply", so it needs
-       its own sentence rather than a row label bolted onto " before applying." */
     note:'Finish your bank & tax info before applying.',
     act:"toast('Would open Settings → Bank Details')"
   });
-  if(!icaOK()) out.push({
-    key:'ica', hard:expired(),
-    /* No verb: the row's own button says "Review & sign". And "updated" would be untrue for
-       an agent signing this for the first time. */
-    label:ICA.title+' V'+ICA.version,
-    /* One fact each: the badge says how urgent, the sub-line says when. No repetition, and
-       no "you can still sign it" next to a live Review & sign button. */
-    badge: expired() ? 'Overdue' : daysLeft()+(daysLeft()===1?' day left':' days left'),
-    sub: expired() ? 'Was due '+fmt(addDays(TODAY,daysLeft())) : 'Due '+fmt(deadline()),
-    scope:'all', cta:'Review & sign',
-    note:'Sign your contractor agreement before applying.',
-    act:"openDoc('ica')"
-  });
   return out;
 }
+
 /* Applying is the ONLY hard gate. It is one well-defined door, it is discretionary, and it
    risks no existing income. Working is reached through many doors — the dashboard project
    switcher, Handle Contacts Now, task claim, deep links — so gating it would be both leaky
    and, for a contractor paid per task, a block on that day's earnings.
    Everything outstanding for a project is surfaced as a reminder instead. */
 function outstandingFor(projectName){
-  const out = requirements().map(r => Object.assign({}, r,
-    {late:r.hard}, r.key==='ica' ? {act:"openLegalDoc('ica')"} : {}));
+  /* Bank & tax has no deadline, so it is never "late" — only a client contract can be. */
+  const out = requirements().map(r => Object.assign({}, r, {late:false}));
   PROJECTDOCS.filter(d=>d.project===projectName && !d.signed).forEach(d=>out.push({
     key:d.id, scope:'project', late:pdocDaysLeft(d)<0,
     label:d.title+' V'+d.version,
@@ -640,44 +629,11 @@ const JOINED = [
   {id:'j8', name:'Complaint Resolution & Service Recovery',     type:'Outbound', stars:3.6, exp:'<3 years'},
   {id:'j10',name:'Feedback Collection for Retail Brand',        type:'Inbound',  stars:3.9, exp:'<3 years'}
 ];
-/* Project-level documents the agent has already accepted at some version. Clients re-issue
-   these too, so they version exactly like the platform agreement. */
-let PROJECTDOCS = [
-  {id:'im-ca',  project:'Image Moderation',  title:'Consulting Agreement', version:1,
-   effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
-  {id:'im-tou', project:'Image Moderation',  title:'Terms of Use', version:1,
-   effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
-  {id:'pz-nda', project:'Large Pizza Project', title:'Project NDA', version:1,
-   effective:'2024-11-18', pages:3, signed:true, signedOn:'2024-11-20', previous:[]},
-  {id:'pz-sow', project:'Large Pizza Project', title:'Statement of Work', version:1,
-   effective:'2024-11-18', pages:4, signed:true, signedOn:'2024-11-20', previous:[]},
-  {id:'rv-nda', project:'RV Rental Platform', title:'Project NDA', version:1,
-   effective:'2025-06-10', pages:3, signed:true, signedOn:'2025-06-12', previous:[]},
-  {id:'rv-sow', project:'RV Rental Platform', title:'Statement of Work', version:2,
-   effective:'2026-08-14', pages:4, signed:false,
-   previous:[{v:1, effective:'2025-06-10', signed:'2025-06-12'}]},
-  {id:'qa-dha', project:'Quality Assurance', title:'Data Handling Addendum', version:2,
-   effective:'2026-07-20', pages:3, signed:false,
-   previous:[{v:1, effective:'2025-01-20', signed:'2025-01-22'}]}
-];
 const PENDING = [
   {id:'q1', name:'Technical Support Tier 1',                    type:'Inbound',  stars:4.0, exp:'<3 years'},
   {id:'q2', name:'Appointment Setting for Dental Group',         type:'Outbound', stars:3.7, exp:'<3 years'}
 ];
 const DOCS = {
-  ica:{title:ICA.title, scope:'all',
-       body:`<h5>Independent Contractor Agreement</h5>
-       <p>This Agreement is entered into between AgentsOnly ("Company") and the undersigned independent contractor ("Contractor"), effective as of the date of acceptance below.</p>
-       <b class="cl">1. Engagement</b>
-       <p>Contractor agrees to provide services on a per-project basis as offered through the Company platform. Nothing in this Agreement creates an employment relationship, partnership, or joint venture between the parties.</p>
-       <b class="cl">2. Independent status</b>
-       <p>Contractor retains sole discretion over the manner and means of performing services, and may accept or decline any project offered.</p>
-       <b class="cl">7. Payment terms</b>
-       <p>Company shall remit payment for accepted work within fourteen (14) days of approval. Payment is calculated per the rate schedule shown at the time each project is accepted. <b>Revised in V3:</b> approved work now settles on a fourteen-day cycle rather than the previous thirty-day cycle.</p>
-       <b class="cl">11. Confidentiality</b>
-       <p>Contractor shall not disclose any client data, materials, or platform information encountered in the course of providing services, and shall return or destroy such materials on request.</p>
-       <b class="cl">14. Term and termination</b>
-       <p>Either party may terminate this Agreement on written notice. Termination does not affect payment owed for work already accepted and approved.</p>`},
   sow:{title:'Statement of Work', scope:'project', project:'RV Rental Platform',
        body:`<h5>Statement of Work — RV Rental Platform</h5>
        <p>This Statement of Work describes the services to be delivered under the RV Rental Platform project and supplements any agreement already in force between the parties.</p>
@@ -695,16 +651,6 @@ const DOCS = {
 /* ============================================================
    HOME
    ============================================================ */
-function contractItem(){
-  /* The deadline badge is what marks this out — the row itself matches every other one. */
-  return {done:false, late:expired(),
-    lbl:'Sign '+ICA.title+' V'+ICA.version,
-    due: expired() ? 'Overdue' : daysLeft()+(daysLeft()===1?' day left':' days left'),
-    act:"openLegalDoc()"};
-}
-/* The platform agreement always gets its own row — it is global and it blocks everything.
-   Project documents are the same kind of errand resolved in the same place, so past one they
-   collapse into a single row rather than crowding the platform item out of a small widget. */
 function projectDocItems(){
   const due = PROJECTDOCS.filter(d=>!d.signed);
   if(!due.length) return [];
@@ -720,31 +666,25 @@ function projectDocItems(){
     due:pdocLabel(soonest),
     act:"go('legal')"}];
 }
+/* Existing agent only: the widget carries whatever is outstanding. Bank & tax leads, since
+   it gates getting paid; the client contracts follow. Neither has a deadline of its own, so
+   only the contract rows carry a badge. */
 function guideItems(){
-  /* An agent who finished onboarding a year ago has no setup left to do. The same
-     component carries whatever IS outstanding, with nothing else around it. */
-  if(S.existing) return (icaOK()?[]:[contractItem()]).concat(projectDocItems());
-  const items = [
-    {done:true,  lbl:'Create your account'},
-    {done:true,  lbl:'Add bank details'},
-    {done:S.bankTax, lbl:'Add tax info'}
-  ];
-  if(!icaOK()) items.push(contractItem());
-  projectDocItems().forEach(i=>items.push(i));
-  if(!S.gigReqs) items.push({done:false, lbl:'Complete Gig Requirements', act:"completeGigReqs()"});
-  return items;
+  const items = [];
+  if(!S.bankTax){
+    items.push({done:false, lbl:'Add bank details', act:"toast('Would open Settings → Bank Details')"});
+    items.push({done:false, lbl:'Add tax info',     act:"toast('Would open Settings → Tax Information')"});
+  }
+  return items.concat(projectDocItems());
 }
 function guideHTML(){
   const items = guideItems();
   const outstanding = items.filter(i=>!i.done).length;
   /* Nothing outstanding means the card is gone. A checklist that lingers at 100% becomes
      wallpaper, and the agent stops seeing it by the time something urgent lands in it. */
-  if(!outstanding){
-    if(S.existing) return '';   // there was never a setup guide for this agent
-    return `<div class="allset">
-      <span class="tick"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-      <span><b>You're all set</b> — nothing outstanding</span></div>`;
-  }
+  /* Nothing outstanding means no widget. There is no onboarding checklist behind this in
+     current scope, so there is nothing to congratulate the agent for finishing. */
+  if(!outstanding) return '';
   const done = items.filter(i=>i.done).length;
   /* Reminder-only mode: no progress to report, and "Setup guide" would be the wrong word. */
   const reminderOnly = done===0;
@@ -864,7 +804,7 @@ function homeHTML(){
    ============================================================ */
 /* The Legal section is "incomplete" whenever something in it still needs a signature —
    that is what the nav-item hint reports. */
-const legalIncomplete = () => !icaOK() || !S.docs.sow || !S.docs.nda;
+const legalIncomplete = () => PROJECTDOCS.some(d=>!d.signed);
 
 function setShell(inner){
   const hint = legalIncomplete()
@@ -893,30 +833,26 @@ const signedTag = date => `<span class="signedon">${PEN}${fmt(date)}</span>`;
 const needsTag  = () => `<span class="tag need">Needs signature</span>`;
 
 function legalHTML(){
-  const signedNow = icaOK();
   const projects = [...new Set(PROJECTDOCS.map(d=>d.project))];
   return setShell(`
         <h2>Legal</h2>
 
         <div class="docgroup">
           <h3>Platform Contracts</h3>
-          <p class="scopenote">Signed once and applies to every project you work on.</p>
-          <button class="docrow clickable ${signedNow?'':'act'}" onclick="openLegalDoc('ica')">
-            <div class="nm"><b>${ICA.title}</b>
-              ${ICA.version>1?`<div class="meta">V${ICA.version} · Effective ${fmt(ICA.effective)}</div>`:''}</div>
-            ${signedNow ? signedTag(addDays(TODAY,0)) : needsTag()}
-          </button>
-          ${historyBlock('ica')}
-          <div class="docrow" style="margin-top:14px">
-            <div class="nm"><b>Background Check Consent &amp; Criminal History Declaration</b></div>
-            ${signedTag('2025-02-03')}
-          </div>
+          <p class="scopenote">Signed once and applies to every project you work on.
+            Not re-issued in this release.</p>
+          ${PLATFORMDOCS.map((d,i)=>`
+            <button class="docrow clickable" ${i?'style="margin-top:14px"':''} onclick="openLegalDoc('${d.id}')">
+              <div class="nm"><b>${esc(d.title)}</b>
+                ${d.version>1?`<div class="meta">V${d.version} · Effective ${fmt(d.effective)}</div>`:''}</div>
+              ${signedTag(d.signedOn)}
+            </button>`).join('')}
         </div>
 
         <div class="docgroup">
           <h3>Project Contracts</h3>
-          <p class="scopenote">Issued by the client. They version like the platform contract, and only
-            affect the project they belong to.</p>
+          <p class="scopenote">Issued by the client. These version, and a new version needs your
+            signature even on a project you are already working on.</p>
           ${projects.map(proj=>`<div class="projgrp">
             <div class="projgrp-nm">${esc(proj)}</div>
             ${PROJECTDOCS.filter(d=>d.project===proj).map(d=>`
@@ -990,10 +926,13 @@ function projectPaper(n, info, c){
   const head = `<div class="aologo"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <b>Agents<br>Only</b></div>
     <h5>${esc(c.title)}</h5>
-    <p style="text-align:center;color:#7c8a9c;margin-bottom:26px">${esc(c.project)} · V${info.v} · Effective ${fmt(info.effective)}</p>`;
+    <p style="text-align:center;color:#7c8a9c;margin-bottom:26px">${c.platform?'AgentsOnly':esc(c.project)} · V${info.v} · Effective ${fmt(info.effective)}</p>`;
   if(n===1) return head + `
-    <p>This contract is issued by the client for the <b>${esc(c.project)}</b> project and applies only to work
-      performed on that project. It supplements, and does not replace, the Independent Contractor Agreement.</p>
+    <p>${c.platform
+      ? `This contract is between AgentsOnly and the Contractor and governs every project the
+         Contractor works on through the Platform.`
+      : `This contract is issued by the client for the <b>${esc(c.project)}</b> project and applies only to work
+         performed on that project. It supplements, and does not replace, the Independent Contractor Agreement.`}</p>
     <p class="cl">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCOPE</p>
     <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will perform the services described in the project brief,
       using the tools and workflows the client provides through the Platform.</p>
@@ -1016,11 +955,8 @@ function projectPaper(n, info, c){
    every project document, because they behave identically once they are versioned. */
 function docCtx(key){
   const K = key || S.docKey;
-  if(K==='ica') return {key:'ica', title:ICA.title, scopeAll:true, project:null,
-    version:ICA.version, effective:ICA.effective, previous:ICA.previous, pages:13,
-    signedOn: icaOK()?addDays(TODAY,0):null};
-  const d = PROJECTDOCS.find(x=>x.id===K) || PROJECTDOCS[0];
-  return {key:d.id, title:d.title, scopeAll:false, project:d.project,
+  const d = PLATFORMDOCS.concat(PROJECTDOCS).find(x=>x.id===K) || PROJECTDOCS[0];
+  return {key:d.id, title:d.title, project:d.project, platform:!d.project,
     version:d.version, effective:d.effective, previous:d.previous, pages:d.pages,
     signedOn: d.signed ? (d.signedOn || addDays(TODAY,0)) : null};
 }
@@ -1031,68 +967,7 @@ function verInfo(v){
   const p = c.previous.find(x=>x.v===v) || c.previous[0];
   return {v:p.v, effective:p.effective, signed:p.signed, current:false};
 }
-function paperPage(n, ver){
-  const c = docCtx();
-  const info = verInfo(ver);
-  if(!c.scopeAll) return projectPaper(n, info, c);
-  const effDisp = info.effective.split('-').join('/');
-  const cycle = info.v===ICA.version ? 'fourteen (14) day' : 'thirty (30) day';
-  const head = `<div class="aologo"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-      <b>Agents<br>Only</b></div>
-    <h5>Contractor Agreement</h5>`;
-  if(n===1) return head + `
-    <p><b>THIS CONTRACTOR AGREEMENT</b> (the "<b>Agreement</b>") is entered into effective as of <b>${effDisp}</b>
-      (the "<b>Effective Date</b>") between <b>AGENTS ONLY TECHNOLOGIES INC.</b>, a corporation having a registered
-      address at 2900 - 550 Burrard Street, Vancouver, BC, V6C 0A3 ("<b>Agents Only</b>") and <b>Olivia Rhye</b>
-      having an address at <b>605 Dog Hill Lane, Topeka, KS 66603</b> (the "<b>Contractor</b>").</p>
-    <p class="cl">WHEREAS:</p>
-    <p class="ind">A.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Agents Only carries on business of offering an online technology
-      and software platform for on-demand gigs, including its proprietary GigCX service (the "<b>Platform</b>");</p>
-    <p class="ind">B.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Contractor has the expertise, qualifications and required
-      certifications to perform the services set out in the attached Appendix "A" (the "<b>Services</b>"); and</p>
-    <p class="ind">C.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Agents Only wishes to engage Contractor to perform the Services
-      and Contractor agrees to provide the Services to Agents Only on the terms and conditions hereinafter set forth:</p>
-    <p><b>NOW THEREFORE THIS AGREEMENT WITNESSES</b> that the parties hereto agree as follows:</p>
-    <p class="cl">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TYPE OF SERVICE</p>
-    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;During the Term of this Agreement, Contractor will perform the Services
-      as set out in <u>Appendix "A"</u>.</p>
-    <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;The Services may require Contractor to access and use Agents Only's
-      Platform. Access and use thereof shall be subject to the terms and conditions then-in-effect, which are
-      incorporated herein by reference as <u>Appendix "B"</u>. Such terms and conditions may be amended from time to
-      time by Agents Only according to its terms. Contractor hereby acknowledges and agrees to comply with the
-      applicable terms and conditions of the Platform.</p>
-    <p class="cl">2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;TERM OF AGREEMENT</p>
-    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;The term of this Agreement shall begin on the Effective Date and shall
-      continue for a period of one (1) year (the "<b>Term</b>"). The Term shall automatically extend for one (1) year
-      renewal periods unless a party provides at least thirty (30) days' notice of non-renewal.</p>
-    <p class="cl">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INDEPENDENT CONTRACTOR STATUS</p>`;
-  if(n===2) return head + `
-    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;Contractor is engaged as an independent contractor. Nothing in this
-      Agreement creates an employment relationship, partnership, joint venture or agency between the parties.</p>
-    <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Contractor retains sole discretion over the manner and means of
-      performing the Services, and may accept or decline any project offered through the Platform.</p>
-    <p class="cl">4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;COMPENSATION</p>
-    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;Agents Only shall pay Contractor for accepted and approved work at the
-      rate shown on the Platform at the time each project is accepted.</p>
-    <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Approved work settles on a <b>${cycle}</b> cycle.${
-      info.v===ICA.version?' <b>Revised in this version:</b> shortened from the thirty (30) day cycle in the prior version.':''}</p>
-    <p class="ind">(c)&nbsp;&nbsp;&nbsp;&nbsp;Contractor is solely responsible for all taxes, remittances and
-      statutory contributions arising from amounts paid under this Agreement.</p>
-    <p class="cl">5.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;EXPENSES</p>
-    <p class="ind">Contractor shall bear its own expenses in performing the Services unless Agents Only has agreed in
-      writing, in advance, to reimburse a specified expense.</p>`;
-  return head + `
-    <p class="cl">${n+2}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GENERAL PROVISIONS (CONTINUED)</p>
-    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;This page is placeholder text standing in for clause ${n+2} of the
-      Agreement. The full contract runs to ${DOC_PAGES} pages; the prototype reproduces the opening pages in full so
-      the reading and signing experience can be assessed.</p>
-    <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Contractor shall not disclose any client data, materials or Platform
-      information encountered in the course of providing the Services, and shall return or destroy such materials on
-      request.</p>
-    <p class="ind">(c)&nbsp;&nbsp;&nbsp;&nbsp;Either party may terminate this Agreement on written notice.
-      Termination does not affect payment owed for work already accepted and approved.</p>
-    <p style="text-align:center;color:#9aa8b8;margin-top:40px">— V${info.v} · Page ${n} of ${DOC_PAGES} —</p>`;
-}
+function paperPage(n, ver){ return projectPaper(n, verInfo(ver), docCtx()); }
 function docPager(){
   const p=S.docPage, last=docCtx().pages;
   let nums=[];
@@ -1122,8 +997,9 @@ function docHTML(){
       Legal</button>
     <div class="docview">
       <h2>${esc(c.title)}<span class="verchip ${archive?'':'cur'}">V${info.v} · ${archive?'Previous version':'Current version'}</span></h2>
-      ${c.project?`<p class="docscope">${esc(c.project)} · Required for this project only</p>`:
-                  `<p class="docscope">Platform contract · Applies to every project you work on</p>`}
+      <p class="docscope">${c.platform
+        ? 'Platform contract · Applies to every project you work on'
+        : esc(c.project)+' · Required for this project only'}</p>
       ${archive?`<div class="notice plain" style="margin-bottom:20px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
         <span><b>These are the terms you agreed to on ${fmt(info.signed)}.</b> They have since been replaced,
@@ -1159,17 +1035,16 @@ function syncSign(){
   if(b) b.disabled = !(S.signName.trim() && S.signChk);
 }
 function openLegalDoc(key, v){
-  S.view='doc'; S.docKey = key || 'ica'; S.docPage=1; S.docVersion = v || null;
+  S.view='doc'; S.docKey = key || 'rv-sow'; S.docPage=1; S.docVersion = v || null;
   S.signName=''; S.signChk=false;
   closeAcct(); closeScrim(); render();
 }
-function backToLegal(){ S.view='legal'; S.docKey='ica'; S.docVersion=null; S.showAllOld=false; render(); }
+function backToLegal(){ S.view='legal'; S.docKey='rv-sow'; S.docVersion=null; S.showAllOld=false; render(); }
 
 function submitSign(){
   if(!(S.signName.trim() && S.signChk)) return;
   const c=docCtx();
-  if(c.key==='ica') S.icaSigned=true;
-  else { const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0); }
+  const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0);
   render();
   toast(c.title+' V'+c.version+' signed.');
 }
@@ -1270,9 +1145,7 @@ function drawProject(){
     <div class="mbody">
       ${modalBody(p, reqs.length?`<div class="reqs ${hard.length?'':'softonly'}">
         <h4>${hard.length?'Before you can apply':'Worth doing soon'}</h4>
-        <div class="sub">${hard.length
-          ? 'These apply to your whole account, not just this project.'
-          : 'You can still apply — but this needs signing before '+fmt(deadline())+'.'}</div>
+        <div class="sub">These apply to your whole account, not just this project.</div>
         ${reqs.map(r=>`<div class="req ${r.hard?'hard':''}">
           <span class="ri">${DOCMARK}</span>
           <span class="rt"><b>${r.label}</b>
@@ -1288,9 +1161,7 @@ function drawProject(){
     <div class="mfoot">
       ${hard.length
         ? `<div class="footnote late">*${hard.length===1?hard[0].note:'Finish the items above before applying.'}</div>`
-        : soft.length
-          ? `<div class="footnote">*Your contractor agreement was updated. You can apply now and sign it by ${fmt(deadline())}.</div>`
-          : `<div class="sp"></div>`}
+        : `<div class="sp"></div>`}
       <button class="btn pri" ${hard.length?'disabled':''} onclick="applyNow()">Apply</button>
     </div>
   </div>`);
@@ -1307,7 +1178,7 @@ function openDoc(key, after){
     <div class="vhead">
       <button class="x" style="position:static" onclick="backFromDoc()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
-      <span class="vt">${esc(d.title)}${key==='ica'?' · V'+ICA.version:''}
+      <span class="vt">${esc(d.title)}
         <span class="chip ${d.scope==='all'?'all':'this'}">${d.scope==='all'?'Required for all projects':'Required for this project'}</span></span>
       <button class="btn pri sm" onclick="signDialog('${key}')">Sign &amp; Continue</button>
     </div>
@@ -1324,7 +1195,7 @@ function signDialog(key){
   scrim(`<div class="signbox">
     <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.2 11 14.7 15.8 9.6"/></svg></div>
     <h4>Sign ${esc(d.title)}</h4>
-    <p>Type your full name to sign ${key==='ica'?'V'+ICA.version+' of this agreement':'this contract'}.</p>
+    <p>Type your full name to sign this contract.</p>
     <label for="fn">Full name</label>
     <input type="text" id="fn" autocomplete="off" oninput="syncConfirm()">
     <div class="chkrow">
@@ -1346,13 +1217,6 @@ function syncConfirm(){
 function doSign(key){
   const c=document.getElementById('sgck');
   if(c && !c.checked) return;
-  if(key==='ica'){
-    S.icaSigned = true;
-    render();   // the page behind the modal has to update too — the guide item is now gone
-    toast('Independent Contractor Agreement V'+ICA.version+' signed.');
-    if(S.openProject) return drawProject();
-    return closeScrim();
-  }
   S.docs[key] = true;
   render();
   toast(DOCS[key].title+' signed.');
@@ -1537,53 +1401,44 @@ function refresh(){
 }
 /* Full wipe, only from the Reset button. */
 function resetAll(){
-  S.icaSigned=false; S.docs={sow:false,nda:false}; S.applied=[];
+  S.docs={sow:false,nda:false}; S.applied=[];
   S.gigReqs=false; S.histOpen={}; S.guideCol=false; S.showAllOld=false;
   S.sub='joined'; S.sort='new'; S.page=1; S.tab='available'; S.view='home';
   S.docKey='ica'; S.docVersion=null; S.signName=''; S.signChk=false;
   S.taskOpen=false; S.workProject=null;
-  setDue(S.due); closeScrim(); render();
+  applyDue(); closeScrim(); render();
 }
-function setScenario(v){
-  /* Only the contract state changes. Where the agent is — tab, page, open modal — is left alone. */
-  S.scenario=v; S.icaSigned=false; S.signName=''; S.signChk=false; S.docVersion=null;
-  refresh();
-}
-
-function setDue(v){
-  S.due=v;
-  const unsigned = v==='platform' ? [] : v==='p1' ? ['rv-sow'] : ['rv-sow','qa-dha'];
+/* Which client contracts are outstanding, and whether they are still inside their window. */
+function applyDue(){
+  const n = S.due==='none' ? 0 : S.due==='p1' ? 1 : 2;
+  const targets = ['rv-sow','qa-dha'];
   PROJECTDOCS.forEach(d=>{
-    if(!['rv-sow','qa-dha'].includes(d.id)) return;   // the rest stay settled
-    d.signed = !unsigned.includes(d.id);
-    if(d.signed && !d.signedOn) d.signedOn = addDays(TODAY,0);
+    const i = targets.indexOf(d.id);
+    if(i<0) return;                                     // the rest stay settled
+    d.signed = i >= n;
+    if(d.signed){ d.signedOn = d.signedOn || addDays(TODAY,0); }
+    /* Windows are relative to today so both states stay demonstrable whenever this is opened. */
+    d.due = S.state==='overdue' ? addDays(TODAY, i===0 ? -4 : -9)
+                                : addDays(TODAY, i===0 ?  8 :  3);
+    d.effective = addDays(new Date(d.due+'T00:00:00Z'), -PDOC_WINDOW);
   });
-  refresh();
 }
-function setHist(n){ S.histCount=n; S.showAllOld=false; S.docVersion=null; refresh(); }
-function setAgent(kind){ S.existing = kind==='existing'; refresh(); }
-
-const CSTATES=[['grace9','9 days'],['grace1','1 day'],['expired','Overdue'],['signed','Signed']];
+function setDue(v){   S.due=v;   applyDue(); refresh(); }
+function setState(v){ S.state=v; applyDue(); refresh(); }
 function stripHTML(){
   return `<div class="strip">
-    <span class="sl">Agent</span>
-    <span class="segwrap">
-      <button class="sb ${S.existing?'':'on'}" onclick="setAgent('new')">New</button>
-      <button class="sb ${S.existing?'on':''}" onclick="setAgent('existing')">Existing</button>
-    </span>
+    <span class="scopetag">Current scope</span>
     <span class="sl">Contracts</span>
-    <span class="segwrap">${[['platform','Platform only'],['p1','+1 project'],['p2','+2 projects']].map(([k,l])=>
+    <span class="segwrap">${[['none','None'],['p1','1'],['p2','2']].map(([k,l])=>
       `<button class="sb ${S.due===k?'on':''}" onclick="setDue('${k}')">${l}</button>`).join('')}</span>
     <span class="sl">Due</span>
-    <span class="segwrap">${CSTATES.map(([k,l])=>
-      `<button class="sb ${S.scenario===k?'on':''}" onclick="setScenario('${k}')">${l}</button>`).join('')}</span>
-    <span class="sl">Version no.</span>
-    <span class="segwrap">${[2,10,14].map(n=>
-      `<button class="sb ${S.histCount===n?'on':''}" onclick="setHist(${n})">${n}</button>`).join('')}</span>
+    <span class="segwrap">${[['grace','In grace'],['overdue','Overdue']].map(([k,l])=>
+      `<button class="sb ${S.state===k?'on':''}" onclick="setState('${k}')">${l}</button>`).join('')}</span>
     <button class="pb ${S.bankTax?'':'act'}" onclick="toggleBankTax()">Bank &amp; tax: ${S.bankTax?'filled':'missing'}</button>
     <button class="pb" onclick="resetAll()">Reset</button>
   </div>`;
 }
+
 
 /* Flipping a prerequisite has to redraw whatever project modal is already open, or the
    footer keeps showing the old verdict. */
@@ -1598,8 +1453,8 @@ function render(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeScrim();});
 /* Reconcile the seeded contracts with whatever the Due control defaults to, so the widget
    and the toolbar never disagree at startup. */
-setDue(S.due);
-setScenario('grace9');
+applyDue();
+render();
 </script>
 </body>
 </html>
