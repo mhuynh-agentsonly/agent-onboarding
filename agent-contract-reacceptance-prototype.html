@@ -722,12 +722,11 @@ function projectDocItems(){
   /* Name the project whenever they are all in one — a count is only worth using when there
      is nothing more specific to say. */
   const projects=[...new Set(due.map(d=>d.project))];
-  if(projects.length===1){
-    const j = JOINED.find(x=>x.name===projects[0]);
-    return [{done:false,
-      lbl:'Sign '+due.length+' project contracts in '+projects[0],
-      act: j ? "openProjectDash('"+j.id+"')" : "go('legal')"}];
-  }
+  if(projects.length===1) return [{done:false,
+    lbl:'Sign '+due.length+' project contracts in '+projects[0],
+    /* The widget is a reminder, so it lands where contracts live rather than dropping the
+       agent into a project they may not have been heading for. */
+    act:"go('legal')"}];
   return [{done:false,
     lbl:'Sign '+due.length+' project contracts across '+projects.length+' projects',
     act:"go('legal')"}];
@@ -1556,8 +1555,8 @@ function gateListHTML(){
       </div>
     </div>
     <div class="gatefoot">
-      ${platform?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>`:''}
-      <button class="lnk" onclick="toast('Would open support')">Contact support</button>
+      ${platform?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>
+                  <button class="lnk" onclick="toast('Would open support')">Contact support</button>`:''}
       <div class="sp"></div>
     </div>`;
 }
@@ -1608,9 +1607,9 @@ function contractCard(d, fromList){
       </div>
     </div>
     <div class="gatefoot">
-      ${fromList?`<button class="lnk" onclick="backToQueue()">← All contracts</button>`
-                : platform?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>`:''}
-      <button class="lnk" onclick="toast('Would open support')">Contact support</button>
+      ${fromList?`<button class="lnk" onclick="backToQueue()">← All contracts</button>`:''}
+      ${platform?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>
+                  <button class="lnk" onclick="toast('Would open support')">Contact support</button>`:''}
       <div class="sp"></div>
       ${done ? `<span class="signedline">Signed ${fmt(d.signedOn)}</span>`
              : `<button class="btn pri sq" id="gbtn" ${ready?'':'disabled'} onclick="acceptGate()">Submit</button>`}
