@@ -245,6 +245,109 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .dashtbl th{text-align:left;font-weight:600;color:var(--ink2);padding:10px 12px;border-bottom:1px solid var(--line)}
 .dashtbl td{padding:12px;border-bottom:1px solid var(--line)}
 .dashtbl tr:last-child td{border-bottom:0}
+.dashgrid.solo{grid-template-columns:minmax(0,1fr)}
+.secttl{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:6px 0 14px}
+.chartkey{display:flex;gap:18px;font-size:12.5px;color:var(--ink2);margin-bottom:10px}
+.chartkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:99px;margin-right:7px}
+.chartkey .k1::before{background:#2e90fa}.chartkey .k2::before{background:#d444a6}
+.chartkey .k3::before{background:#6172f3}
+.chartph{border-radius:12px;background:linear-gradient(180deg,#fbfdff,#f4f8fb);padding:14px 8px 8px}
+.chartph svg{display:block;width:100%;height:190px}
+.chartx{display:flex;justify-content:space-between;padding:8px 4px 2px;font-size:11.5px;color:var(--ink3)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.cpanel{background:#fafbfe;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.cph{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:10px}
+.crow{display:flex;align-items:center;gap:16px;padding:10px 0;font-size:13.5px;
+  border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.crow .sp{flex:1}
+.crow.chd{font-size:11.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em}
+.cdot{width:13px;height:13px;border-radius:99px;flex:none}
+.cdot.ok{background:#12b76a}.cdot.warn{background:#f79009}.cdot.bad{background:#f04438}
+.cbig{padding:12px 0 4px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.cbig b{font-size:32px;font-weight:700;letter-spacing:-.02em}
+.cdelta{font-size:12px;font-weight:600;color:#12b76a;margin-left:10px}
+.cdot.sm{width:9px;height:9px}
+.chartkey .k4::before{background:#c3cdd8}
+.cardhd{display:flex;align-items:center;gap:14px;margin:4px 0 10px;flex-wrap:wrap}
+.cardhd .sp{flex:1}
+.selpill{border:1px solid var(--line2);background:#fff;border-radius:10px;padding:9px 13px;
+  font-size:13.5px;display:inline-flex;align-items:center;gap:8px;color:var(--ink)}
+.selpill:hover{background:#f7fafc}
+.selpill svg{width:15px;height:15px;color:var(--ink3);flex:none}
+/* ---------- insights rail ---------- */
+.dashside.plain{background:none;min-height:0;padding:0}
+.railttl{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px;display:flex;
+  flex-direction:column}
+.railttl .ms{font-size:12px;color:var(--ink3);font-weight:400;margin-top:4px}
+.relcard{background:#fff;border-radius:16px;padding:16px 18px;box-shadow:var(--sh-md)}
+.relhd{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink2);margin-bottom:12px}
+.relhd svg{width:16px;height:16px;flex:none}
+.relbig{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.relpill{font-size:26px;font-weight:700;padding:5px 16px;border-radius:12px;letter-spacing:-.02em}
+.relpill.good{background:#e7f8f1;color:#0a7a5c}
+.relpill.bad{background:#fdeceb;color:#c8372a}
+.relstar{font-size:11px;font-weight:700;color:#b45309}
+.relsub{font-size:12px;color:var(--ink3);margin-top:10px}
+.relsub b{color:var(--ink2);font-weight:600}
+/* ---------- average handle time ---------- */
+.ahtgrid{display:grid;grid-template-columns:236px minmax(0,1fr);gap:16px;margin-top:22px;
+  align-items:stretch}
+@media(max-width:1000px){.ahtgrid{grid-template-columns:1fr}}
+.ahtcard{border-radius:18px;padding:22px 20px;color:#fff;display:flex;flex-direction:column;gap:20px;
+  background:linear-gradient(158deg,#12a596,#0b7a83 58%,#0e5f77)}
+.ahtcard .n{font-size:27px;font-weight:700;letter-spacing:-.02em;display:block}
+.ahtcard .l{font-size:12.5px;opacity:.88;margin-top:3px;display:flex;align-items:center;gap:6px}
+.ahtcard .l svg{width:14px;height:14px}
+.ahtcard .goal{background:rgba(255,255,255,.17);border-radius:14px;padding:13px 15px;margin-top:auto}
+.ahttbl{width:100%;border-collapse:collapse;font-size:13px}
+.ahttbl th{font-weight:600;color:var(--ink2);text-align:center;padding:8px;font-size:12px;
+  line-height:1.35;vertical-align:bottom}
+.ahttbl th:first-child{text-align:left;width:34%}
+.ahttbl td{padding:13px 8px;text-align:center;border-top:1px solid var(--line);
+  font-size:17px;font-weight:700;letter-spacing:-.02em}
+.ahttbl td:first-child{text-align:left}
+.ahttbl .u{font-size:11px;font-weight:500;color:var(--ink3);display:block;margin-top:1px}
+.ahttbl .lo{color:#c8372a}.ahttbl .hi{color:#0a7a5c}
+.ahtwho{display:flex;align-items:center;gap:10px;color:var(--ink)}
+.ahtwho svg{width:22px;height:22px;color:var(--ink3);flex:none}
+.ahtwho b{font-size:15px;font-weight:700;display:block}
+.ahtwho i{font-size:12px;font-style:normal;color:var(--ink3);font-weight:400}
+/* ---------- leaderboard ---------- */
+.lbchip{background:#eef4ff;color:#3538cd;font-size:12.5px;font-weight:600;padding:5px 11px;
+  border-radius:99px}
+.rank{width:28px;height:28px;border-radius:99px;display:grid;place-items:center;background:#eef4ff;
+  font-size:12.5px;font-weight:700;color:#3538cd}
+.lbname{display:flex;align-items:center;gap:9px;font-weight:600}
+.lbname .av{width:24px;height:24px;border-radius:99px;background:#e8eef1;color:var(--ink2);
+  font-size:9.5px;font-weight:700;display:grid;place-items:center;flex:none}
+.mchip{display:inline-block;background:#F2F4F7;color:#344054;font-size:11px;padding:3px 8px;
+  border-radius:6px;margin:4px 5px 0 0}
+/* ---------- coaching feedback ---------- */
+.fbbanner{margin-top:22px;border-radius:18px 18px 0 0;padding:20px 26px 44px;
+  background:linear-gradient(99deg,#19b9ab 4%,#5a6ee6 58%,#63aee8 100%)}
+.fbbanner h3{margin:0;font-size:20px;font-weight:700;color:#0d2b3c;letter-spacing:-.02em}
+.pcard.fbcard{margin-top:-26px;border-radius:18px}
+.filtbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.fbcount{font-size:12.5px;color:var(--ink3);margin:14px 0 2px}
+.dashtbl tr.sel td{background:var(--teal-s)}
+.fbdot{width:17px;height:17px;border-radius:99px;background:#12b76a;color:#fff;font-size:11px;
+  font-weight:700;display:grid;place-items:center}
+.fbmeta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.fbtile{border:1px solid var(--line2);border-radius:12px;padding:9px 15px;min-width:140px}
+.fbtile .l{font-size:11.5px;color:var(--ink3);display:flex;gap:6px;align-items:center}
+.fbtile .l svg{width:13px;height:13px}
+.fbtile b{font-size:14px;font-weight:600;display:block;margin-top:3px}
+.fbids{font-size:12.5px;color:var(--ink3);line-height:1.7}
+.fbids b{color:var(--ink);font-weight:600}
+.fbgrid{display:grid;grid-template-columns:minmax(0,1fr) 258px;gap:22px}
+@media(max-width:1000px){.fbgrid{grid-template-columns:1fr}}
+.fbhd{display:flex;align-items:center}
+.fbhd .sp{flex:1}
+.fbtag{display:inline-block;background:#F2F4F7;color:#344054;font-size:10.5px;font-weight:700;
+  letter-spacing:.06em;padding:3px 8px;border-radius:5px}
+.fbnote{font-size:13.5px;line-height:1.62;color:var(--ink2);margin:9px 0 20px}
 .worknow{display:flex;align-items:center;gap:14px;border:1px solid #bfe6d7;background:var(--teal-s);
   border-radius:12px;padding:15px 18px}
 .worknow b{font-size:15px}
@@ -281,9 +384,14 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .projgrp-nm{font-size:14.5px;font-weight:700;margin-bottom:12px}
 .projgrp .docrow{margin-bottom:10px}
 .projgrp .prev{margin:-2px 0 12px 2px}
-.vlist{margin:2px 0 14px;padding:0 16px}
-.vrow{display:flex;align-items:center;gap:14px;padding:11px 0;font-size:13.5px;color:var(--ink2);
+/* The version list belongs to the tile above it, so the gap inside the pair has to be smaller
+   than the gap to the next document — otherwise the rows read as a separate block that happens
+   to sit underneath. The negative margin eats most of the tile's own margin-bottom; the space
+   between documents is set by the margin-top on each following tile. */
+.vlist{margin:-6px 0 0;padding:0 16px}
+.vrow{display:flex;align-items:center;gap:14px;padding:9px 0;font-size:13.5px;color:var(--ink2);
   border-bottom:1px solid var(--line)}
+.vrow:first-child{padding-top:5px}
 .vrow:last-child{border-bottom:0}
 .vrow b{color:var(--ink);font-weight:600}
 .vrow .sp{flex:1}
@@ -526,7 +634,7 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .gatefoot .lnk{border:0;background:transparent;color:var(--ink2);font-size:13.5px;font-weight:600;
   padding:9px 12px;border-radius:9px}
 .gatefoot .lnk:hover{background:#f2f5f8;color:var(--ink)}
-.toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:300;display:flex;
+.toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:520;display:flex;
   flex-direction:column;gap:9px;align-items:center;pointer-events:none}
 .toast{background:#14273d;color:#fff;border-radius:11px;padding:12px 18px;font-size:14px;
   box-shadow:var(--sh-lg);display:flex;gap:10px;align-items:center;animation:tin .22s ease}
@@ -535,7 +643,9 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 
 /* ---------- prototype controls: one low pill strip, out of the way ---------- */
 /* Single row, always. Wrapping turned the pill into a blob, so it scrolls instead. */
-.strip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:250;
+/* Above the platform gate. The strip is not part of the product — it is the control panel for
+   demoing it — so being trapped behind the very scrim it sets up would make it useless. */
+.strip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:500;
   background:#22303f;color:#fff;border-radius:99px;padding:6px 8px;display:flex;align-items:center;gap:6px;
   box-shadow:0 12px 32px rgba(16,30,50,.30);font-size:12px;flex-wrap:nowrap;
   max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}
@@ -614,17 +724,26 @@ const platformBlocked = () => PLATFORMDOCS.some(d=>!d.signed);
 /* Read-only in this release: signed once, never re-issued. They are viewable so the agent
    can go back and read what they agreed to — the same reason the project ones are. */
 const PLATFORMDOCS = [
-  {id:'ica', project:null, title:'Independent Contractor Agreement', version:2,
-   effective:'2026-09-02', pages:6, signed:true, signedOn:'2025-02-03',
-   previous:[{v:1, effective:'2025-02-01', signed:'2025-02-03'}]},
-  /* Re-issued: data terms change as the law and the client base do. */
+  /* `edition` is model-only: it never reaches the screen. The platform agreement really does
+     vary by jurisdiction — the 2024 Global text and the Spain text are different documents, not
+     one improved into the other — but that is a fact for the data layer to carry. Agents see a
+     plain version number, which is what the API can be relied on to return. */
+  {id:'ica', project:null, title:'Independent Contractor Agreement', edition:'Spain',
+   version:2, effective:'2026-09-02', pages:6, signed:true, signedOn:'2026-09-03',
+   previous:[{v:1, edition:'2024 Global', effective:'2025-02-01', signed:'2025-02-03'}]},
+  /* This one does version in the ordinary way: the same document, revised as data law changes.
+     Both kinds of history exist, so the list in the Legal tab has to read correctly for each. */
   {id:'dpa', project:null, title:'Data Processing Agreement', version:2,
-   effective:'2026-09-01', pages:4, signed:true, signedOn:'2025-02-03',
+   effective:'2026-09-01', pages:4, signed:true, signedOn:'2026-09-02',
    previous:[{v:1, effective:'2025-02-01', signed:'2025-02-03'}]},
   /* Never re-issued: a one-time consent, kept so the Legal tab shows both kinds. */
   {id:'bgc', project:null, title:'Background Check Consent & Criminal History Declaration',
    version:1, effective:'2025-02-01', pages:3, signed:true, signedOn:'2025-02-03', previous:[]}
 ];
+/* Project contracts do not version. A client issues distinct documents — NDA, Statement of
+   Work, Data Handling Addendum — and when it needs something more from an agent already on the
+   project it adds another one. So there is no V2 of anything here, no version history, and
+   nothing to re-sign: a contract is either signed, or newly added and waiting. */
 let PROJECTDOCS = [
   {id:'im-ca',  project:'Image Moderation',  title:'Consulting Agreement', version:1,
    effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
@@ -636,12 +755,10 @@ let PROJECTDOCS = [
    effective:'2024-11-18', pages:4, signed:true, signedOn:'2024-11-20', previous:[]},
   {id:'rv-nda', project:'RV Rental Platform', title:'Project NDA', version:1,
    effective:'2025-06-10', pages:3, signed:true, signedOn:'2025-06-12', previous:[]},
-  {id:'rv-sow', project:'RV Rental Platform', title:'Statement of Work', version:2,
-   effective:'2026-09-02', pages:4, signed:false,
-   previous:[{v:1, effective:'2025-06-10', signed:'2025-06-12'}]},
-  {id:'qa-dha', project:'Quality Assurance', title:'Data Handling Addendum', version:2,
-   effective:'2026-09-01', pages:3, signed:false,
-   previous:[{v:1, effective:'2025-01-20', signed:'2025-01-22'}]}
+  {id:'rv-sow', project:'RV Rental Platform', title:'Statement of Work', version:1,
+   effective:'2026-09-02', pages:4, signed:false, previous:[]},
+  {id:'qa-dha', project:'Quality Assurance', title:'Data Handling Addendum', version:1,
+   effective:'2026-09-01', pages:3, signed:false, previous:[]}
 ];
 
 /* Only one account-level prerequisite is left in scope, and it is pre-existing behaviour. */
@@ -667,8 +784,11 @@ function outstandingFor(projectName){
   const out = requirements().map(r => Object.assign({}, r, {late:false}));
   PROJECTDOCS.filter(d=>d.project===projectName && !d.signed).forEach(d=>out.push({
     key:d.id, scope:'project', blocks:true,
-    label:d.title+' V'+d.version,
-    sub:'Required to access '+d.project,
+    label:d.title,
+    /* The date, because it is the only thing on this row that nothing else says. The heading,
+       the sub-line under it and the chip all already state that this contract gates this
+       project — "Required to access {project}" made that the fourth time. */
+    sub:'Effective '+fmt(d.effective),
     cta:'Review & sign', act:"openLegalDoc('"+d.id+"')"
   }));
   return out;
@@ -724,7 +844,7 @@ function projectDocItems(){
   const due = PROJECTDOCS.filter(d=>!d.signed);
   if(!due.length) return [];
   if(due.length===1) return [{done:false,
-    lbl:'Sign '+due[0].title+' V'+due[0].version+' — '+due[0].project,
+    lbl:'Sign '+due[0].title+' — '+due[0].project,
     act:"openLegalDoc('"+due[0].id+"')"}];
   /* Name the project whenever they are all in one — a count is only worth using when there
      is nothing more specific to say. */
@@ -898,6 +1018,7 @@ function setShell(inner){
   </div>`;
 }
 
+const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
 const DOCMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`;
 const TICKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
 const PEN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`;
@@ -913,10 +1034,11 @@ function legalHTML(){
 
         <div class="docgroup">
           <h3>Platform Contracts</h3>
-          <p class="scopenote">Signed once and applies to every project you work on. A new version
-            has to be accepted before anything else in the portal.</p>
-          ${PLATFORMDOCS.map((d,i)=>`
-            <button class="docrow clickable" ${i?'style="margin-top:14px"':''} onclick="openLegalDoc('${d.id}')">
+          ${/* Alphabetical, sorted at render rather than baked into the data, so a document added
+               later lands in the right place without anyone reordering the array. Sorting here and
+               not in PLATFORMDOCS itself also leaves the gate's own order alone. */''}
+          ${PLATFORMDOCS.slice().sort((a,b)=>a.title.localeCompare(b.title)).map((d,i)=>`
+            <button class="docrow clickable" ${i?'style="margin-top:20px"':''} onclick="openLegalDoc('${d.id}')">
               <div class="nm"><b>${esc(d.title)}</b></div>
               ${signedTag(d.signedOn)}
             </button>
@@ -925,8 +1047,6 @@ function legalHTML(){
 
         <div class="docgroup">
           <h3>Project Contracts</h3>
-          <p class="scopenote">Issued by the client. These version, and a new version needs your
-            signature even on a project you are already working on.</p>
           ${projects.map(proj=>`<div class="projgrp">
             <div class="projgrp-nm">${esc(proj)}</div>
             ${PROJECTDOCS.filter(d=>d.project===proj).map(d=>`
@@ -939,19 +1059,21 @@ function legalHTML(){
         </div>`);
 }
 
-/* No count in the toggle label — the number is the least useful fact about this list, and
-   it would read absurdly at "Show 40 previous versions". It lives inside instead. */
-/* Versions are shown outright, as a plain list rather than stacked tiles — they are a record
-   to scan, not objects to act on. */
+/* Previous versions only, shown outright as a plain list — a record to scan, not objects to
+   act on. The live version is deliberately absent: the list sits under the tile, so it reads as
+   history, and a first row repeating the contract the tile already stands for made the top row
+   look like a previous version when it was not.
+   The cost is that nothing here names the version in force. It is one click away — the tile
+   opens the live document, which badges itself V2 · Current — and worth paying to stop the list
+   contradicting its own position on the page.
+   Project contracts never reach this function: they have no history at all. */
 function versionRows(d){
-  if(d.version<2) return '';
-  const rows = [{v:d.version, effective:d.effective, signed:d.signed?d.signedOn:null, cur:true}]
-    .concat(d.previous.map(x=>({v:x.v, effective:x.effective, signed:x.signed})));
-  return `<div class="vlist">${rows.map(r=>`
+  if(!d.previous.length) return '';
+  return `<div class="vlist">${d.previous.map(r=>`
     <div class="vrow">
-      <span><b>V${r.v}</b> · Effective ${fmt(r.effective)}${r.signed?' · You signed '+fmt(r.signed):''}</span>
+      <span><b>V${r.v}</b> · Effective ${fmt(r.effective)} · You signed ${fmt(r.signed)}</span>
       <span class="sp"></span>
-      <a href="#" onclick="event.preventDefault();openLegalDoc('${d.id}'${r.cur?'':','+r.v})">View contract</a>
+      <a href="#" onclick="event.preventDefault();openLegalDoc('${d.id}',${r.v})">View contract</a>
     </div>`).join('')}</div>`;
 }
 
@@ -959,12 +1081,23 @@ function versionRows(d){
    DOCUMENT VIEW — sign, and later review, in the place the doc lives
    ============================================================ */
 const DOC_PAGES = 13;
+/* How a document identifies itself. A project contract has nothing to add — there is only ever
+   one of each, so a number would be noise. A platform contract gives its version number and
+   nothing more: the jurisdiction it belongs to is a fact about the model, not something an
+   agent-facing badge has to carry, and a plain number is what the API can be relied on to
+   return. */
+function docStamp(c, info){
+  if(!c.platform) return '';
+  return 'V'+info.v;
+}
 /* Project documents are short. Same frame, same signing block, less paper. */
 function projectPaper(n, info, c){
+  const stamp = docStamp(c, info);
+  const revised = info.current && c.previous && c.previous.length;
   const head = `<div class="aologo"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
       <b>Agents<br>Only</b></div>
     <h5>${esc(c.title)}</h5>
-    <p style="text-align:center;color:#7c8a9c;margin-bottom:26px">${c.platform?'AgentsOnly':esc(c.project)} · V${info.v} · Effective ${fmt(info.effective)}</p>`;
+    <p style="text-align:center;color:#7c8a9c;margin-bottom:26px">${c.platform?'AgentsOnly':esc(c.project)}${stamp?' · '+stamp:''} · Effective ${fmt(info.effective)}</p>`;
   if(n===1 && c.platform) return head + `
     <p>This contract is between AgentsOnly and the Contractor and governs every project the
       Contractor works on through the Platform.</p>
@@ -975,7 +1108,7 @@ function projectPaper(n, info, c){
     <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will process personal data only on documented
       instructions from the Company, and only for the project it was provided for.</p>
     <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will not transfer personal data outside the tools
-      the Company provides.${info.v>1?' <b>Revised in this version:</b> extended to cover AI assistants and any third-party tooling.':''}</p>
+      the Company provides.${revised?' <b>New in the '+stamp+':</b> extended to cover AI assistants and any third-party tooling.':''}</p>
     <p class="cl">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RETENTION</p>
     <p class="ind">Contractor will retain personal data no longer than the task requires, and will
       delete or return it on request.</p>
@@ -991,15 +1124,15 @@ function projectPaper(n, info, c){
     <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will complete any client-specific training module before
       handling live work.</p>
     <p class="cl">2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QUALITY</p>
-    <p class="ind">Contractor will maintain an average quality score of ${info.v>1?'3.8':'3.5'} or above across any
-      rolling thirty-day period.${info.v>1?' <b>Revised in this version:</b> raised from 3.5.':''}</p>
+    <p class="ind">Contractor will maintain an average quality score of 3.5 or above across any
+      rolling thirty-day period.</p>
     <p class="cl">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONFIDENTIALITY</p>
     <p class="ind">Contractor will not disclose client data, materials or pricing encountered on this project, and
       will return or destroy such materials on request.</p>`;
   return head + `
     <p class="cl">${n+2}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FURTHER TERMS</p>
     <p class="ind">Placeholder text standing in for the remaining clauses of this document.</p>
-    <p style="text-align:center;color:#9aa8b8;margin-top:40px">— V${info.v} · Page ${n} of ${c.pages} —</p>`;
+    <p style="text-align:center;color:#9aa8b8;margin-top:40px">— ${stamp?stamp+' · ':''}Page ${n} of ${c.pages} —</p>`;
 }
 /* Which version's terms are on screen. Previous versions really do differ — that is the
    whole reason for keeping them. */
@@ -1039,6 +1172,7 @@ function docPager(){
 function docHTML(){
   const c       = docCtx();
   const info    = verInfo(S.docVersion);
+  const stamp   = docStamp(c, info);
   const archive = !info.current;                  // a superseded version, kept for the record
   const done    = archive ? true : !!c.signedOn;  // review mode on the live version
   const name    = done ? 'Olivia O.J Rhye' : S.signName;
@@ -1048,7 +1182,7 @@ function docHTML(){
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>
       Legal</button>
     <div class="docview">
-      <h2>${esc(c.title)}<span class="verchip ${archive?'':'cur'}">V${info.v} · ${archive?'Previous version':'Current version'}</span></h2>
+      <h2>${esc(c.title)}${stamp?`<span class="verchip ${archive?'':'cur'}">${stamp} · ${archive?'Replaced':'Current'}</span>`:''}</h2>
       <p class="docscope">${c.platform
         ? 'Platform contract · Applies to every project you work on'
         : esc(c.project)+' · Required for this project only'}</p>
@@ -1056,7 +1190,7 @@ function docHTML(){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
         <span><b>These are the terms you agreed to on ${fmt(info.signed)}.</b> They have since been replaced,
           so they no longer govern your work.
-          &nbsp;<button class="prev" onclick="openLegalDoc('${c.key}')">View V${c.version}, the current version</button></span></div>`:''}
+          &nbsp;<button class="prev" onclick="openLegalDoc('${c.key}')">View the current ${docStamp(c, verInfo(null))}</button></span></div>`:''}
       <div class="paperframe"><div class="paperpg">${paperPage(S.docPage, info.v)}</div></div>
       ${docPager()}
       <div class="sigsec">
@@ -1098,7 +1232,7 @@ function submitSign(){
   const c=docCtx();
   const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0);
   render();
-  toast(c.title+' V'+c.version+' signed.');
+  toast(c.title+' signed.');
 }
 
 /* ============================================================
@@ -1154,19 +1288,27 @@ function drawProject(){
      Go to Project stays live regardless. */
   if(S.openKind==='joined'){
     const due = outstandingFor(p.name);
-    const blocked = due.some(r=>r.blocks);
+    const blockers = due.filter(r=>r.blocks);
+    const blocked  = blockers.length>0;
+    const nblock   = blockers.length;
     return scrim(`<div class="modal" data-m="project">
       <div class="mhead"><h3>${esc(p.name)}</h3>${closeX}</div>
       <div class="mbody">${modalBody(p, due.length?`<div class="reqs ${blocked?'':'softonly'}">
-          <h4>${blocked?'Sign to access this project':'Worth doing soon'}</h4>
+          <h4>${blocked?'Review &amp; sign to access this project':'Worth doing soon'}</h4>
           <div class="sub">${blocked
-            ? 'The client has issued a new version. You can\'t open this project until you accept it.'
+            ? (nblock>1
+                ? "The client has added new contracts. You can't open this project until you sign them."
+                : "The client has added a new contract. You can't open this project until you sign it.")
             : 'None of this affects your work on this project — you can carry on as normal.'}</div>
           ${due.map(r=>`<div class="req">
             <span class="ri">${DOCMARK}</span>
             <span class="rt"><b>${r.label}</b>
+              ${/* The only list where the scopes genuinely differ row to row: an account
+                    prerequisite sitting next to a project contract. "for your account" rather than
+                    "for all projects", so it cannot be misread as a platform contract — those
+                    never reach this modal, because the portal gate catches them on entry. */''}
               <span class="chiprow">
-                <span class="chip ${r.scope==='project'?'this':'all'}">${r.scope==='project'?'Required for this project':'Required for all projects'}</span>
+                <span class="chip ${r.scope==='project'?'this':'all'}">${r.scope==='project'?'Required for this project':'Required for your account'}</span>
               </span>
               <span class="reqsub">${r.sub}</span></span>
             <button class="btn ghost sm" onclick="${r.act}">${r.cta}</button>
@@ -1174,8 +1316,14 @@ function drawProject(){
         </div>`:'')}</div>
       <div class="mfoot">
         <div class="sp"></div>
+        ${/* Signing happens in Settings → Legal, the same place the row buttons above go and the
+             same place the reminder widget goes. The dashboard gate is for an agent who was
+             actually stopped at that project's door; opening a card to look at a project is not
+             that, so it should not relocate them into the project.
+             One outstanding contract opens that contract. Two or more open the Legal tab, so the
+             agent can see both rather than meeting them one at a time. */''}
         ${blocked
-          ? `<button class="btn pri" onclick="openProjectDash('${p.id}')">Review &amp; sign to continue</button>`
+          ? `<button class="btn pri" onclick="${nblock>1?"go('legal')":"openLegalDoc('"+blockers[0].key+"')"}">Review &amp; sign to continue</button>`
           : `<button class="btn pri" onclick="openWork('${p.id}')">Go to Project</button>`}</div>
     </div>`);
   }
@@ -1203,10 +1351,8 @@ function drawProject(){
         ${reqs.map(r=>`<div class="req ${r.hard?'hard':''}">
           <span class="ri">${DOCMARK}</span>
           <span class="rt"><b>${r.label}</b>
-            <span class="chiprow">
-              <span class="chip ${r.scope==='project'?'this':'all'}">${r.scope==='project'?'Required for this project':'Required for all projects'}</span>
-              ${r.badge?`<span class="due ${r.late||r.hard?'late':''}">${r.badge}</span>`:''}
-            </span>
+            ${r.badge?`<span class="chiprow">
+              <span class="due ${r.late||r.hard?'late':''}">${r.badge}</span></span>`:''}
             <span class="reqsub">${r.sub}</span></span>
           <button class="btn ghost sm" onclick="${r.act}">${r.cta}</button>
         </div>`).join('')}
@@ -1287,24 +1433,88 @@ function pickDash(id){
   S.gatePick=null; S.gateList=false; S.gateName=''; S.gateChk=false; S.gatePage=1;
   render();
 }
-function dashHTML(){
-  const p = JOINED.find(x=>x.id===S.dashProject) || JOINED[0];
-  return `<div class="dashgrid"><div class="dashmain">
-    <h1 class="hi" style="margin-bottom:18px">Welcome back, Olivia!</h1>
-    <div class="dashhead">
+/* The rule for what a project contract blocks is the project selector at the top of the page.
+   A page that carries the selector is scoped to one project, so an unsigned contract for that
+   project replaces its body with the gate. A page without it — Schedule, Earnings, Referrals,
+   account settings — belongs to the agent rather than to the project, and is never blocked.
+   Earnings most of all: that money is already earned.
+   Written as a rule rather than as a list of three pages, so that a project-scoped page added
+   later inherits the block instead of quietly missing it. Missing it is not theoretical — an
+   agent who opens Insights before Dashboard walks straight past a gate that only Dashboard has. */
+const PROJPAGES = {dash:'Dashboard', insights:'Insights', coaching:'Coaching'};
+
+function projHead(p, cta){
+  return `<div class="dashhead">
       <button class="dashsel" onclick="S.dashSel=!S.dashSel;render()">${esc(p.name)}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
       <div class="sp"></div>
-      <button class="btn pri" ${projLocked(p.name)?'disabled':''}
-        onclick="toast('Would hand you off to the client platform to work')">Handle Contacts Now</button>
+      ${cta||''}
       ${S.dashSel?`<div class="dashmenu">${JOINED.map(j=>`
         <button class="dashopt" onclick="pickDash('${j.id}')">
           <span>${esc(j.name)}</span>
           ${projLocked(j.name)?`<span class="lockchip">${DOCMARK}Signature required</span>`:''}
         </button>`).join('')}</div>`:''}
-    </div>
-    ${projLocked(p.name)?`<div class="pcard gateinline">${gateContent()}</div>`:`
-    <div class="metrics">
+    </div>`;
+}
+/* One shell for all three. The gate takes the place of the body, never of the header — the
+   agent keeps the project selector, so switching to a project they can still open is one click
+   and not a dead end. */
+function projPage(kind){
+  const p = JOINED.find(x=>x.id===S.dashProject) || JOINED[0];
+  const locked = projLocked(p.name);
+  /* Handle Contacts Now hands the agent off to the client platform to do the work, so it is
+     the one control on these pages that has to go dead with the contract. */
+  const cta = kind==='dash'
+    ? `<button class="btn pri" ${locked?'disabled':''}
+        onclick="toast('Would hand you off to the client platform to work')">Handle Contacts Now</button>`
+    : '';
+  const body = locked ? `<div class="pcard gateinline">${gateContent()}</div>`
+    : kind==='dash' ? dashBody() : kind==='insights' ? insightsBody() : coachingBody();
+  /* Dashboard keeps the branded column. Insights puts its reliability metrics in the rail as
+     plain cards under a heading, the way the real screen does. Coaching has no rail.
+     A locked project has no rail either, whichever page it is. The rail carries that project's
+     numbers — star rating, earnings, adherence — so leaving it up beside the gate would publish
+     the very figures the gate is there to withhold. The gate covers exactly what it blocks: the
+     whole content area, with only the project selector left standing so the agent can move on. */
+  const aside = locked ? ''
+    : kind==='dash'
+    ? `<aside class="dashside">
+         <div class="sidecard"><b>4.2</b><span class="stars">\u2605\u2605\u2605\u2605<span class="dim">\u2605</span></span>
+           <div class="sl2">Star Rating</div></div>
+         <div class="sidecard"><div class="sl2">Total earnings</div><b style="font-size:26px">\u20B999k</b>
+           <div class="ms">\u20B969,321.95 base \u00B7 \u20B930,600.00 star bonus</div></div>
+       </aside>`
+    : kind==='insights'
+    ? `<aside class="dashside plain">
+         <div class="railttl">Reliability Metrics<span class="ms">Previous week data</span></div>
+         <div class="relcard">
+           <div class="relhd">${NAVICON['calendar']}Schedule adherence</div>
+           <div class="relbig"><span class="relpill good">97%</span>
+             <span class="relstar">\u2b50 You're a STAR!</span></div>
+           <div class="relsub">Preferred agent average <b>99%</b></div>
+         </div>
+         <div class="relcard">
+           <div class="relhd">${BANICON}Cancellation rate</div>
+           <div class="relbig"><span class="relpill bad">15%</span></div>
+           <div class="relsub">Preferred agent average <b>8%</b></div>
+         </div>
+         <div class="relcard">
+           <div class="relhd">${BOLTICON}Surge minutes delivered</div>
+           <div class="relbig"><b style="font-size:30px;letter-spacing:-.02em">9,999</b>
+             <span class="relsub" style="margin:0">mins</span></div>
+         </div>
+       </aside>`
+    : '';
+  return `<div class="dashgrid ${aside?'':'solo'}"><div class="dashmain">
+    ${kind==='dash'?`<h1 class="hi" style="margin-bottom:18px">Welcome back, Olivia!</h1>`:''}
+    ${projHead(p, cta)}
+    ${body}
+  </div>${aside}</div>`;
+}
+function dashHTML(){ return projPage('dash'); }
+
+function dashBody(){
+  return `<div class="metrics">
       ${[['30','Ticket Closure','Project average 50'],['3.8','Resolution','Project average 3.86'],
          ['3.55','Agent CSAT','Project average 3.59']].map(([n,l,sub])=>`
         <div class="metric"><b>${n}</b><div class="ml">${l}</div><div class="ms">${sub}</div></div>`).join('')}
@@ -1315,20 +1525,169 @@ function dashHTML(){
         <button class="subtab" onclick="toast('Not part of this prototype')">Pay Details</button></div>
       <table class="dashtbl"><thead><tr><th>Star Ratings</th><th>Start Time</th><th>Duration</th>
         <th>Contact Outcome</th><th>Earnings</th></tr></thead><tbody>
-        ${[['3.5','2026/09/04 21:18','23:24:43','Order Success','₹10.50'],
-           ['4.5','2026/09/04 21:17','01:26:08','Order Success','₹20.00'],
-           ['3.9','2026/09/03 22:22','23:24:43','Order Success','₹11.23'],
-           ['2.5','2026/09/03 11:28','01:26:08','Delivery w/without cc','₹20.00']].map(r=>
+        ${[['3.5','2026/09/04 21:18','23:24:43','Order Success','\u20B910.50'],
+           ['4.5','2026/09/04 21:17','01:26:08','Order Success','\u20B920.00'],
+           ['3.9','2026/09/03 22:22','23:24:43','Order Success','\u20B911.23'],
+           ['2.5','2026/09/03 11:28','01:26:08','Delivery w/without cc','\u20B920.00']].map(r=>
           `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
       </tbody></table>
-    </div>`}</div>
-    <aside class="dashside">
-      <div class="sidecard"><b>4.2</b><span class="stars">\u2605\u2605\u2605\u2605<span class="dim">\u2605</span></span>
-        <div class="sl2">Star Rating</div></div>
-      <div class="sidecard"><div class="sl2">Total earnings</div><b style="font-size:26px">\u20B999k</b>
-        <div class="ms">\u20B969,321.95 base \u00B7 \u20B930,600.00 star bonus</div></div>
-    </aside></div>`;
+    </div>`;
 }
+/* Enough of each page to be recognisable at a glance — the point is that the contract reaches
+   these pages, not that the numbers are real. */
+const BANICON  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>';
+const BOLTICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2"/></svg>';
+const PERSON1  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>';
+const PERSON2  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="8" r="3.4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 5.6M17.5 14.3c2.6.7 4.5 3 4.5 5.7"/></svg>';
+const STARLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.9 9.2 21.5 10 16.7 14.6 17.9 21.2 12 18 6.1 21.2 7.3 14.6 2.5 10 9.1 9.2 12 3"/></svg>';
+
+function insightsBody(){
+  const tabs = [['Star Rating',1],['Handle Time',0],['Sentiment',0],['Ticket Price',0],
+                ['Adherence',0],['Cancellation',0]];
+  const months = ['May','Jun','Jul','Aug','Sep','Oct','Nov'];
+  const aht = [
+    [PERSON1, 'You',            'Weekly average', ['328','300','332','332'], [0,1,0,0]],
+    [PERSON2, 'Project',        'Weekly average', ['400','120','400','400'], [0,0,0,0]],
+    [STARLINE,'Five-star Goal', 'Target time',    ['350','90','350','350'],  [0,0,0,0]]
+  ];
+  const board = [['Cat D.','CD','4.1'],['Jay K.','JK','4.0'],['Paul Q.','PQ','4.0']];
+  return `<div class="pcard">
+      <div class="subtabs">${tabs.map(([t,on])=>`<button class="subtab ${on?'on':''}"
+        ${on?'':`onclick="toast('Not part of this prototype')"`}>${t}</button>`).join('')}</div>
+      <div class="cardhd">
+        <h3 class="secttl" style="margin:0">Star Rating</h3>
+        <div class="sp"></div>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Monthly ${CHEV}</button>
+      </div>
+      <div class="chartkey"><span class="k1">XX Star Agents</span><span class="k2">Project</span>
+        <span class="k3">You</span><span class="k4">No data</span></div>
+      <div class="chartph">
+        <svg viewBox="0 0 640 190" preserveAspectRatio="none" aria-hidden="true">
+          ${[38,76,114,152].map(y=>`<line x1="0" y1="${y}" x2="640" y2="${y}" stroke="#e8eef1" stroke-width="1"/>`).join('')}
+          <path d="M0 150 C 90 34 160 26 250 108 S 420 186 520 66 640 40 640 40" fill="none" stroke="#d444a6" stroke-width="3"/>
+          <path d="M0 118 C 100 118 150 56 250 52 S 430 150 530 58 640 38 640 38" fill="none" stroke="#2e90fa" stroke-width="3"/>
+          <path d="M0 104 C 110 104 150 166 250 130 S 430 98 640 106" fill="none" stroke="#6172f3" stroke-width="3"/>
+        </svg>
+        <div class="chartx">${months.map(m=>`<span>${m} 2026</span>`).join('')}</div>
+      </div>
+    </div>
+
+    <div class="ahtgrid">
+      <div class="ahtcard">
+        <div><span class="n">375 sec</span><span class="l">${PERSON1} Your Average</span></div>
+        <div><span class="n">280 sec</span><span class="l">${PERSON2} Project Average</span></div>
+        <div class="goal"><span class="n">270 sec</span><span class="l">\u2b50 Five-star Goal</span></div>
+      </div>
+      <div class="pcard">
+        <h3 class="secttl" style="margin-top:0">Subcomponents of Average Handle Time</h3>
+        <p class="scopenote" style="margin:-8px 0 14px">Improve <b>AHT</b> by achieving the following
+          subcomponent targets</p>
+        <table class="ahttbl"><thead><tr><th></th><th>Tech Support</th>
+          <th>Cancellations &amp; Refunds</th><th>New Listing \u2013 Email</th>
+          <th>Password Reset \u2013 Chat</th></tr></thead><tbody>
+          ${aht.map(([ic,nm,sub,vals,flags])=>`<tr>
+            <td><span class="ahtwho">${ic}<span><b>${nm}</b><i>${sub}</i></span></span></td>
+            ${vals.map((v,i)=>`<td class="${flags[i]?'lo':'hi'}">${v}<span class="u">sec</span></td>`).join('')}
+          </tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="pcard" style="margin-top:22px">
+      <div class="cardhd">
+        <h3 class="secttl" style="margin:0">Leaderboard</h3>
+        <span class="lbchip">You're crushing it! Keep pushing to reach the top.</span>
+        <div class="sp"></div>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Daily ${CHEV}</button>
+      </div>
+      <table class="dashtbl"><thead><tr><th>Rank</th><th>Name</th><th>Star Rating</th></tr></thead><tbody>
+        ${board.map(([nm,in2,st],i)=>`<tr>
+          <td><span class="rank">${i+1}</span></td>
+          <td><span class="lbname"><span class="av">${in2}</span>${nm}</span></td>
+          <td><b>${st} \u2b50</b>
+            <div>${['Estimated Gross Profits: 80%','First Contact Resolution: $576',
+                   'Call Abandonment Rate: 87.4','Total Mins: 576']
+                   .map(c=>`<span class="mchip">${c}</span>`).join('')}</div></td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+}
+
+function coachingBody(){
+  const beh = [['Accuracy','ok','warn'],['Assumptive Sales','bad','ok'],['Rebuttals','bad','ok'],
+               ['Efficiency / Tools','bad','ok'],['Discovery','warn','warn']];
+  const fb = [['Dec 15, 2023','3.5','Sales with Prepaid','4','300','5',1],
+              ['Oct 16, 2023','3.6','Cancellations &amp; Refunds','4','300','3',0],
+              ['Oct 16, 2023','3.1','Tech Support','4','300','4',1],
+              ['Oct 9, 2023','3.2','Lorem ipsum dolor sit consectet','4','300','5',0]];
+  return `<div class="pcard">
+      <h3 class="secttl" style="margin-top:0">Performance Summary</h3>
+      <div class="cgrid">
+        <div class="cpanel">
+          <div class="cph">Contact monitoring</div>
+          <div class="crow chd"><span>Behaviours</span><span class="sp"></span><span>Own</span><span>Experts</span></div>
+          ${beh.map(([n,a,b])=>`<div class="crow"><span>${n}</span><span class="sp"></span>
+            <span class="cdot ${a}"></span><span class="cdot ${b}"></span></div>`).join('')}
+        </div>
+        <div class="cpanel">
+          <div class="cph">Monthly star rating</div>
+          <div class="cbig"><b>4.8 \u2b50</b><span class="cdelta">\u25b2 7%</span>
+            <div class="ms">Compared to 4.5 last month</div></div>
+          <div class="crow"><span>Project avg star rating (MTD)</span><span class="sp"></span><b>4.5</b></div>
+          <div class="crow"><span>Top performers minimum</span><span class="sp"></span><b>4.6</b></div>
+        </div>
+      </div>
+      <div class="metrics" style="margin-top:16px">
+        ${[['10','Red flags','#c8372a'],['05','Cancellations','#c8372a'],
+           ['Advanced','Overall experts rating','#0a7a5c'],['#2','Streak rank','#3538cd'],
+           ['#5','Star rating rank','#b45309']].map(([n,l,c])=>`
+          <div class="metric"><b style="color:${c}">${n}</b><div class="ml">${l}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="fbbanner"><h3>Feedback</h3></div>
+    <div class="pcard fbcard">
+      <div class="filtbar">
+        <button class="selpill" onclick="toast('Not part of this prototype')">${NAVICON['calendar']}Select date</button>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Star Rating ${CHEV}</button>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Contact Outcome ${CHEV}</button>
+        <button class="btn pri sm" disabled>Apply filter</button>
+      </div>
+      <div class="fbcount">23 Feedback</div>
+      <table class="dashtbl"><thead><tr><th>Date</th><th>\u2b50</th><th>Contact Outcome</th>
+        <th>Sentiment</th><th>Avg. Handle Time</th><th>CSAT</th><th></th></tr></thead><tbody>
+        ${fb.map(([dt,st,oc,se,ht,cs,flag],i)=>`<tr class="${i?'':'sel'}">
+          <td>${dt}</td><td>${st}</td><td>${oc}</td><td>${se}</td><td>${ht}</td><td>${cs}</td>
+          <td>${flag?`<span class="fbdot">!</span>`:''}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+
+    <div class="pcard" style="margin-top:16px">
+      <div class="fbmeta">
+        <div class="fbtile"><span class="l">Contact Outcome</span><b>Sales with Prepaid</b></div>
+        <div class="fbtile"><span class="l">${STARLINE}Star Rating</span><b>3.5</b></div>
+        <div class="fbids">Date: <b>Oct 23, 2023</b><br>Contact ID: <b>armn-1254-yyyy-0010</b></div>
+      </div>
+      <div class="fbgrid">
+        <div>
+          <div class="fbhd"><span class="fbtag">OWN</span><span class="sp"></span>
+            <span class="ms">Oct 25, 2023</span></div>
+          <p class="fbnote">Handled the prepaid objection well and kept the customer on the call, but
+            skipped the discovery questions and went straight to the offer.</p>
+          <div class="fbhd"><span class="fbtag">EXPERTS</span><span class="sp"></span>
+            <span class="ms">Nov 1, 2023</span></div>
+          <p class="fbnote">Agreed on the objection handling. Discovery would have surfaced the second
+            line on the account, which is where the upsell was.</p>
+        </div>
+        <div class="cpanel" style="align-self:start">
+          <div class="crow chd"><span></span><span class="sp"></span><span>Own</span><span>Experts</span></div>
+          ${beh.map(([n,a,b])=>`<div class="crow"><span>${n}</span><span class="sp"></span>
+            <span class="cdot sm ${a}"></span><span class="cdot sm ${b}"></span></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
 
 /* ============================================================
    PROJECT WORKSPACE — where an ongoing agent takes on new work
@@ -1386,7 +1745,6 @@ function drawProjectDocs(){
   const row = (k)=>`<div class="req ${S.docs[k]?'':'hard'}" style="${S.docs[k]?'background:var(--teal-s);border-color:#bfe6d7':''}">
     <span class="ri ${S.docs[k]?'ok':''}">${S.docs[k]?TICKMARK:DOCMARK}</span>
     <span class="rt"><b>${DOCS[k].title}</b>
-      <span class="chip this">Required for this project</span>
       <span class="reqsub">${S.docs[k]?'Signed just now':'Not signed yet'}</span></span>
     ${S.docs[k]?'':`<button class="btn ghost sm" onclick="openDoc('${k}','docs')">Review &amp; sign</button>`}
   </div>`;
@@ -1435,8 +1793,8 @@ const NAVITEMS = [
   {ic:'home',        lbl:'Home',      view:'home'},
   {ic:'trello',      lbl:'Dashboard', view:'dash'},
   {ic:'calendar',    lbl:'Schedule'},
-  {ic:'trending-up', lbl:'Insights'},
-  {ic:'rocket',      lbl:'Coaching'},
+  {ic:'trending-up', lbl:'Insights', view:'insights'},
+  {ic:'rocket',      lbl:'Coaching', view:'coaching'},
   {ic:'dollar-sign', lbl:'Earnings'},
   {ic:'user-plus',   lbl:'Referrals'}
 ];
@@ -1525,20 +1883,20 @@ function gateListHTML(){
   return `<div class="gatehead">
       <h3>${q.length} of ${set.length} contracts need your signature</h3>
       <p>${platform
-        ? `We've updated the agreements between you and AgentsOnly. Accept all of them to carry
+        ? `We've issued new agreements between you and AgentsOnly. Accept all of them to carry
            on using the portal.`
-        : `${esc(q[0].project)} has issued new versions. Accept all of them before you can work on
-           this project or see its dashboard. Everything else in the portal still works.`}</p>
+        : `${esc(q[0].project)} has added new contracts. Sign all of them before you can work on this
+           project or open its dashboard, insights or coaching. Everything else in the portal
+           still works.`}</p>
     </div>
     <div class="gatebody">
       <div class="reqs">
         ${set.map(d=>`<div class="req">
           <span class="ri ${d.signed?'ok':''}">${d.signed?TICKMARK:DOCMARK}</span>
-          <span class="rt"><b>${esc(d.title)} V${d.version}</b>
-            <span class="chiprow">
-              <span class="chip ${platform?'all':'this'}">${platform?'Required for all projects':'Required for this project'}</span>
-              ${d.signed?signedTag(d.signedOn):''}
-            </span>
+          <span class="rt"><b>${esc(d.title)}${platform?' V'+d.version:''}</b>
+            ${/* No scope chip. Every row in this list has the same scope, and the paragraph above
+                 has already said it in a sentence — so the chip only added a row of noise. */''}
+            ${d.signed?`<span class="chiprow">${signedTag(d.signedOn)}</span>`:''}
             <span class="reqsub">Effective ${fmt(d.effective)}</span></span>
           <button class="btn ghost sm" onclick="pickGateDoc('${d.id}')">${d.signed?'View':'Review &amp; sign'}</button>
         </div>`).join('')}
@@ -1564,14 +1922,15 @@ function contractCard(d, fromList){
   const c = {key:d.id, title:d.title, project:d.project, platform, version:d.version,
              effective:d.effective, previous:d.previous, pages:d.pages, signedOn:null};
   return `<div class="gatehead">
-      <h3>${esc(d.title)} V${d.version}
-        <span class="chip ${platform?'all':'this'}">${platform?'Required for all projects':'Required for this project'}</span></h3>
-      <p>${platform
-        ? `We've updated the agreement between you and AgentsOnly. Please read and accept it to
-           carry on using the portal — nothing else is available until you do.`
-        : `${esc(d.project)} has issued a new version of this contract. Accept it before you can
-           work on this project or see its dashboard. Everything else in the portal still works,
-           and you can switch projects above.`}</p>
+      <h3>${esc(d.title)}${platform?' V'+d.version:''}</h3>
+      ${/* No explainer on the platform card. The scrim behind it already shows the portal is
+             out of reach, and the contract's own opening line says who it binds — so a paragraph
+             saying both was telling the agent what they can already see.
+             The project card keeps its copy, because what it says is not visible anywhere: that
+             the rest of the portal still works and that switching projects is an option. */''}
+      ${platform?'':`<p>${esc(d.project)} has added this contract. Sign it before you can work on
+           this project or open its dashboard, insights or coaching. Everything else in the portal
+           still works, and you can switch projects above.</p>`}
     </div>
     <div class="gatebody">
       <div class="paperframe"><div class="paperpg">${projectPaper(S.gatePage, info, c)}</div></div>
@@ -1597,9 +1956,16 @@ function contractCard(d, fromList){
       </div>
     </div>
     <div class="gatefoot">
-      ${fromList?`<button class="lnk" onclick="backToQueue()">← All contracts</button>`:''}
-      ${platform?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>
-                  <button class="lnk" onclick="toast('Would open support')">Contact support</button>`:''}
+      ${/* Name the list it goes back to. "All contracts" is a promise this button cannot keep —
+           the list behind it is only the contracts blocking this one thing. "Back" would be
+           accurate but inside a modal it reads as "close", which is the one exit the gate has
+           not got. */''}
+      ${fromList?`<button class="lnk" onclick="backToQueue()">← All ${platform?'platform':esc(d.project)} contracts</button>`:''}
+      ${/* Log out lives on the contract LIST, which is one click back. Repeating it here made
+           three links sit side by side under the signature. It stays on a single-contract gate,
+           where there is no list to go back to and losing it would leave no way out at all. */''}
+      ${platform&&!fromList?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>`:''}
+      ${platform?`<button class="lnk" onclick="toast('Would open support')">Contact support</button>`:''}
       <div class="sp"></div>
       ${done ? `<span class="signedline">Signed ${fmt(d.signedOn)}</span>`
              : `<button class="btn pri sq" id="gbtn" ${ready?'':'disabled'} onclick="acceptGate()">Submit</button>`}
@@ -1709,7 +2075,9 @@ function render(){
   document.getElementById('gate').innerHTML  = gateHTML();
   document.getElementById('rail').innerHTML  = railHTML();
   document.getElementById('view').innerHTML  =
-      S.view==='home' ? homeHTML() : S.view==='dash' ? dashHTML() : S.view==='work' ? workHTML()
+      S.view==='home' ? homeHTML()
+      : PROJPAGES[S.view] ? projPage(S.view)
+      : S.view==='work' ? workHTML()
       : S.view==='doc' ? docHTML() : legalHTML();
   document.getElementById('strip').innerHTML = stripHTML();
 }
