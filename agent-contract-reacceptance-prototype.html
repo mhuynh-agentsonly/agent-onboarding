@@ -577,8 +577,9 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .req>.btn{align-self:center;flex-shrink:0}
 .chip{display:inline-block;font-size:11.5px;font-weight:500;padding:3px 9px;border-radius:99px;
   background:#F2F4F7;color:#344054;margin-left:7px;vertical-align:1px}
+/* One chip left in the product — the account prerequisite on bank & tax — so there is no
+   longer a second variant to distinguish it from. */
 .chip.all{background:#F2F4F7;color:#344054}
-.chip.this{background:var(--teal-s);color:var(--teal-ink)}
 
 /* ---------- doc viewer ---------- */
 .viewer{background:#fff;border-radius:18px;box-shadow:var(--sh-lg);width:min(940px,100%);height:min(88vh,860px);
@@ -1313,13 +1314,16 @@ function drawProject(){
           ${due.map(r=>`<div class="req">
             <span class="ri">${DOCMARK}</span>
             <span class="rt"><b>${r.label}</b>
-              ${/* The only list where the scopes genuinely differ row to row: an account
-                    prerequisite sitting next to a project contract. "for your account" rather than
-                    "for all projects", so it cannot be misread as a platform contract — those
-                    never reach this modal, because the portal gate catches them on entry. */''}
-              <span class="chiprow">
-                <span class="chip ${r.scope==='project'?'this':'all'}">${r.scope==='project'?'Required for this project':'Required for your account'}</span>
-              </span>
+              ${/* Only the account prerequisite is badged. A project contract sitting inside a
+                    project's own modal does not need telling that it belongs to that project —
+                    the heading, the sub-line and the surrounding context all say so already.
+                    Bank & tax is the exception because it is the one row whose reach is wider
+                    than the modal it appears in. "for your account" rather than "for all
+                    projects", so it cannot be misread as a platform contract — those never reach
+                    this modal, because the portal gate catches them on entry. */''}
+              ${r.scope==='project'?'':`<span class="chiprow">
+                <span class="chip all">Required for your account</span>
+              </span>`}
               <span class="reqsub">${r.sub}</span></span>
             <button class="btn ghost sm" onclick="${r.act}">${r.cta}</button>
           </div>`).join('')}
@@ -1388,8 +1392,7 @@ function openDoc(key, after){
     <div class="vhead">
       <button class="x" style="position:static" onclick="backFromDoc()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
-      <span class="vt">${esc(d.title)}
-        <span class="chip ${d.scope==='all'?'all':'this'}">${d.scope==='all'?'Required for all projects':'Required for this project'}</span></span>
+      <span class="vt">${esc(d.title)}</span>
       <button class="btn pri sm" onclick="signDialog('${key}')">Sign &amp; Continue</button>
     </div>
     <div class="vpaper"><div class="paper">${d.body}</div></div>
