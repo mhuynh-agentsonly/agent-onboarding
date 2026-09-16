@@ -751,9 +751,32 @@ let PROJECTDOCS = [
    effective:'2025-06-10', pages:3, signed:true, signedOn:'2025-06-12', previous:[]},
   {id:'rv-sow', project:'RV Rental Platform', title:'Statement of Work', version:1,
    effective:'2026-09-02', pages:4, signed:false, previous:[]},
+  /* RENEWAL. The one exception to "project contracts are signed once". Some countries cap how
+     long a single IC engagement can run on one signature — Australia at six months — so the
+     client sets a re-signing schedule on the contract and the SAME document comes round again.
+     No new upload, no new version, no new row: only the signature expires.
+     `renewMonths` and `country` exist purely so every renewal surface can say why. The clock
+     runs from `signedOn` — this agent's own signature — never from the upload date, so two
+     agents on the same contract fall due on different days. */
+  {id:'rv-ica', project:'RV Rental Platform', title:'Independent Contractor Agreement', version:1,
+   effective:'2026-03-08', pages:4, signed:true, signedOn:'2026-03-10', previous:[],
+   country:'Australia', renewMonths:6},
   {id:'qa-dha', project:'Quality Assurance', title:'Data Handling Addendum', version:1,
    effective:'2026-09-01', pages:3, signed:false, previous:[]}
 ];
+
+/* A renewal reuses the outstanding-contract mechanism exactly — same widget row, same Legal
+   tile, same gate, same card. Nothing new is built. The only difference is what the agent is
+   told, so every surface asks this one question and swaps its copy.
+   Deliberately no countdown, no warning window, no overdue state: §12 stands, a contract is a
+   blocker rather than a timer, and a renewal is no different on the day it falls due. */
+const isResign = d => !!(d && d.resign && !d.signed);
+/* The sentence the whole feature turns on. Said once here so the gate, the card and the Legal
+   document page cannot drift apart. */
+function renewalWhy(d){
+  return `Independent contractor engagements in ${esc(d.country)} are limited to
+    ${d.renewMonths} months, so the same agreement has to be signed again.`;
+}
 
 /* Only one account-level prerequisite is left in scope, and it is pre-existing behaviour. */
 function requirements(){
@@ -779,9 +802,12 @@ function outstandingFor(projectName){
   PROJECTDOCS.filter(d=>d.project===projectName && !d.signed).forEach(d=>out.push({
     key:d.id, scope:'project', blocks:true,
     label:d.title,
-    /* The date, because it is the only thing on this row that nothing else says. The heading,
-       the sub-line under it and the chip all already state that this contract gates this
-       project — "Required to access {project}" made that the fourth time. */
+    /* One row treatment for every case — newly added, signature expired, or a mix of both,
+       and no variant needed: the effective date is a fact about the DOCUMENT, and a renewal
+       is the same document, still effective from the same date. It is also the only thing on
+       this row that nothing around it repeats, which is why it beats restating the task.
+       Why a title the agent recognises is back gets explained on the document itself, where
+       there is room to say it properly. */
     sub:'Effective '+fmt(d.effective),
     cta:'Review & sign', act:"openLegalDoc('"+d.id+"')"
   }));
@@ -837,19 +863,30 @@ const DOCS = {
 function projectDocItems(){
   const due = PROJECTDOCS.filter(d=>!d.signed);
   if(!due.length) return [];
+  /* The word has to say "you have signed this before" without ever being "re-sign".
+     Hyphenated, it collapses into "resign" — quit — for anyone scanning quickly or reading
+     in a second language, and it turns up on a row that is already telling the agent they
+     are blocked from a project. "Sign … again" carries the same meaning, cannot be misread,
+     and is simpler English besides. */
   if(due.length===1) return [{done:false,
-    lbl:'Sign '+due[0].title+' — '+due[0].project,
+    lbl: isResign(due[0])
+      ? 'Sign '+due[0].title+' again — '+due[0].project
+      : 'Sign '+due[0].title+' — '+due[0].project,
     act:"openLegalDoc('"+due[0].id+"')"}];
   /* Name the project whenever they are all in one — a count is only worth using when there
      is nothing more specific to say. */
   const projects=[...new Set(due.map(d=>d.project))];
+  /* Only say "again" when every outstanding contract is a renewal. Mixed goes back to the
+     plain wording, because "again" would be wrong for half the list. */
+  const allAgain = due.every(isResign);
   if(projects.length===1) return [{done:false,
-    lbl:'Sign '+due.length+' project contracts in '+projects[0],
+    lbl:'Sign '+due.length+' project contracts'+(allAgain?' again':'')+' in '+projects[0],
     /* The widget is a reminder, so it lands where contracts live rather than dropping the
        agent into a project they may not have been heading for. */
     act:"go('legal')"}];
   return [{done:false,
-    lbl:'Sign '+due.length+' project contracts across '+projects.length+' projects',
+    lbl:'Sign '+due.length+' project contracts'+(allAgain?' again':'')
+        +' across '+projects.length+' projects',
     act:"go('legal')"}];
 }
 /* An existing agent has no setup left, so the widget carries only what is outstanding. A new
@@ -1154,6 +1191,9 @@ function docCtx(key){
   const d = PLATFORMDOCS.concat(PROJECTDOCS).find(x=>x.id===K) || PROJECTDOCS[0];
   return {key:d.id, title:d.title, project:d.project, platform:!d.project,
     version:d.version, effective:d.effective, previous:d.previous, pages:d.pages,
+    /* `lastSigned` survives an expiry — the signature that ran out is what the renewal notice
+       is about, so it cannot be cleared when the document goes back to unsigned. */
+    resign:isResign(d), country:d.country, renewMonths:d.renewMonths, lastSigned:d.signedOn,
     signedOn: d.signed ? (d.signedOn || addDays(TODAY,0)) : null};
 }
 function verInfo(v){
@@ -1197,6 +1237,13 @@ function docHTML(){
       <p class="docscope">${c.platform
         ? 'Platform contract · Applies to every project you work on'
         : esc(c.project)+' · Required for this project only'}</p>
+      ${/* The renewal notice sits exactly where the "replaced version" notice sits, and does the
+             same job: it explains, before the paper, why the document on screen is not simply the
+             one the agent expected. Same component, different sentence. */''}
+      ${c.resign?`<div class="notice plain" style="margin-bottom:20px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span><b>You signed this contract on ${fmt(c.lastSigned)}.</b> ${renewalWhy(c)}
+          Nothing in the document has changed.</span></div>`:''}
       ${archive?`<div class="notice plain" style="margin-bottom:20px">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
         <span><b>These are the terms you agreed to on ${fmt(info.signed)}.</b> They have since been replaced,
@@ -1241,9 +1288,14 @@ function backToLegal(){ S.view='legal'; S.docKey='rv-sow'; S.docVersion=null; re
 function submitSign(){
   if(!(S.signName.trim() && S.signChk)) return;
   const c=docCtx();
+  const wasResign=c.resign;
   const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0);
   render();
-  toast(c.title+' signed.');
+  /* A renewal is worth confirming as a renewal: the agent knows they signed this before, so
+     "signed" alone leaves them wondering whether the right thing happened. */
+  toast(wasResign
+    ? c.title+' signed again. Next due in '+c.renewMonths+' months.'
+    : c.title+' signed.');
 }
 
 /* ============================================================
@@ -1306,10 +1358,14 @@ function drawProject(){
       <div class="mhead"><h3>${esc(p.name)}</h3>${closeX}</div>
       <div class="mbody">${modalBody(p, due.length?`<div class="reqs ${blocked?'':'softonly'}">
           <h4>${blocked?'Review &amp; sign to access this project':'Worth doing soon'}</h4>
+          ${/* One wording for all three cases — new contracts, expired signatures, or a mix.
+                 It works because the heading and sub-line describe the SITUATION (you are held up
+                 on this project, and only this project) rather than why each contract is
+                 outstanding, which is the only thing that actually differs between the cases.
+                 "Review & sign" is true of an expired signature too: the agent does review it and
+                 sign it, and it never claims the contract is new. */''}
           <div class="sub">${blocked
-            ? (nblock>1
-                ? "The client has added new contracts. You can't open this project until you sign them."
-                : "The client has added a new contract. You can't open this project until you sign it.")
+            ? 'Everything else in the portal still works — only this project is affected.'
             : 'None of this affects your work on this project — you can carry on as normal.'}</div>
           ${due.map(r=>`<div class="req">
             <span class="ri">${DOCMARK}</span>
@@ -1893,14 +1949,20 @@ function backToQueue(){ S.gateList=true; S.gatePick=null; S.gateName=''; S.gateC
 function gateListHTML(){
   const set = gateSet(), q = gateQueue();
   const platform = !set[0].project;
+  const allResign = !platform && q.every(d=>isResign(d));
   return `<div class="gatehead">
       <h3>${q.length} of ${set.length} contracts need your signature</h3>
       <p>${platform
         ? `We've issued new agreements between you and AgentsOnly. Accept all of them to carry
            on using the portal.`
-        : `${esc(q[0].project)} has added new contracts. Sign all of them before you can work on this
-           project or open its dashboard, insights or coaching. Everything else in the portal
-           still works.`}</p>
+        : allResign
+          ? `Your signatures on these contracts have expired under your country's contractor law.
+             They are the same documents you already signed — sign them again before you can work
+             on this project or open its dashboard, insights or coaching. Everything else in the
+             portal still works.`
+          : `${esc(q[0].project)} has added new contracts. Sign all of them before you can work on this
+             project or open its dashboard, insights or coaching. Everything else in the portal
+             still works.`}</p>
     </div>
     <div class="gatebody">
       <div class="reqs">
@@ -1941,7 +2003,16 @@ function contractCard(d, fromList){
              saying both was telling the agent what they can already see.
              The project card keeps its copy, because what it says is not visible anywhere: that
              the rest of the portal still works and that switching projects is an option. */''}
-      ${platform?'':`<p>${esc(d.project)} has added this contract. Sign it before you can work on
+      ${/* A renewal has one more thing to explain than a new contract does, and it is the thing
+             the agent will otherwise get wrong: this is the document they already signed, it has
+             not changed, and it is the signature rather than the terms that ran out. */''}
+      ${platform?''
+        : isResign(d)
+        ? `<p>You signed this contract on <b>${fmt(d.signedOn)}</b>. ${renewalWhy(d)} Nothing in the
+             document has changed — sign it again before you can work on this project or open its
+             dashboard, insights or coaching. Everything else in the portal still works, and you
+             can switch projects above.</p>`
+        : `<p>${esc(d.project)} has added this contract. Sign it before you can work on
            this project or open its dashboard, insights or coaching. Everything else in the portal
            still works, and you can switch projects above.</p>`}
     </div>
@@ -2044,12 +2115,18 @@ function resetAll(){
 }
 /* Which client contracts the client has re-issued and not yet been accepted. */
 function applyDue(){
-  const map = {none:[], p1:['rv-sow'], same:['rv-sow','rv-nda'], two:['rv-sow','qa-dha']};
+  const map = {none:[], p1:['rv-sow'], same:['rv-sow','rv-nda'], two:['rv-sow','qa-dha'],
+               /* A renewal falling due. Same machinery as a re-issue — the document simply goes
+                  back to unsigned — which is the whole point: nothing new is built for it. */
+               renew:['rv-ica']};
   const unsigned = map[S.due] || [];
-  ['rv-sow','rv-nda','qa-dha'].forEach(id=>{
+  ['rv-sow','rv-nda','qa-dha','rv-ica'].forEach(id=>{
     const d = PROJECTDOCS.find(x=>x.id===id);
     d.reissued = unsigned.includes(id);
     d.signed   = !unsigned.includes(id);
+    /* Only a contract carrying a re-signing schedule can expire. Everything else that turns up
+       unsigned is a contract the client has just added. */
+    d.resign   = !!(d.renewMonths && d.reissued);
     if(d.signed) d.signedOn = d.signedOn || addDays(TODAY,0);
   });
 }
@@ -2076,7 +2153,8 @@ function stripHTML(){
     <span class="segwrap">${[['signed','Signed'],['one','1 unsigned'],['two','2 unsigned']].map(([k,l])=>
       `<button class="sb ${S.platform===k?'on':''}" onclick="setPlatform('${k}')">${l}</button>`).join('')}</span>
     <span class="sl">Project contracts</span>
-    <span class="segwrap">${[['none','None'],['p1','1'],['same','2 in one'],['two','2 in two']].map(([k,l])=>
+    <span class="segwrap">${[['none','None'],['p1','1'],['same','2 in one'],['two','2 in two'],
+                             ['renew','Renewal due']].map(([k,l])=>
       `<button class="sb ${S.due===k?'on':''}" onclick="setDue('${k}')">${l}</button>`).join('')}</span>
     <button class="pb ${S.bankTax?'':'act'}" onclick="toggleBankTax()">Bank &amp; tax: ${S.bankTax?'filled':'missing'}</button>
     <button class="pb" onclick="resetAll()">Reset</button>
