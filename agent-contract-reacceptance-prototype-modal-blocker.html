@@ -1,0 +1,2289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Portal — project contract blocked by a modal (PO option)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<style>
+:root{
+  --ink:#16263c; --ink2:#4a5a71; --ink3:#78879a;
+  --panel:#fff; --line:#e8eef1; --line2:#dbe4ea;
+  --teal:#0a9d78; --teal-d:#087c5f; --teal-s:#e6f7f0; --teal-ink:#0a7358;
+  --amber:#a85a08; --amber-s:#fdf4e7; --amber-line:#f2dcb6;
+  --red:#c53b3b; --red-s:#fdf1f1;
+  --od:#c2620a; --od-s:#fdf0e0;          /* overdue — always orange, never red */
+  --rail-on:#e2f6ee;
+  --sh:0 1px 2px rgba(16,30,50,.05);
+  --sh-md:0 4px 16px rgba(16,30,50,.08);
+  --sh-lg:0 18px 50px rgba(16,30,50,.18),0 3px 8px rgba(16,30,50,.06);
+  --font:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;color:var(--ink);
+  background:linear-gradient(160deg,#e6f1f4 0%,#eef5f7 30%,#f6f9fa 70%);
+  background-attachment:fixed;min-height:100vh;
+  font:14.5px/1.55 var(--font);
+  -webkit-font-smoothing:antialiased}
+/* One family for the whole prototype, including form controls, which otherwise
+   fall back to the OS UI font. */
+button,input,select,textarea,optgroup{font-family:var(--font)}
+button{font-size:inherit;cursor:pointer}
+input,select{font-size:inherit;color:var(--ink)}
+a{color:var(--teal);text-decoration:none}
+
+.app{min-height:100vh}
+
+/* ---------- left nav: matches the Figma "Sidebar navigation – Slim" spec ----------
+   82px at rest, 232px on hover. The 82px column stays reserved, so the expanded panel
+   overlays the page instead of shoving it sideways. */
+.rail{position:fixed;left:0;top:0;bottom:0;width:82px;background:#fff;border-right:1px solid #E4E7EC;
+  z-index:80;overflow:hidden;transition:width .18s ease}
+.rail:is(:hover,.pin){width:232px;box-shadow:0 12px 26px -8px rgba(16,24,40,.13)}
+.railin{height:100%;display:flex;flex-direction:column;justify-content:space-between;padding-top:32px}
+.rnav{display:flex;flex-direction:column;gap:24px}
+.rlogo{display:flex;align-items:center;gap:9px;padding:0 16px 12px;justify-content:center}
+.rail:is(:hover,.pin) .rlogo{justify-content:flex-start;padding-left:24px;padding-right:20px}
+.mark{width:22px;height:22px;display:grid;grid-template-columns:repeat(3,1fr);gap:3px;flex-shrink:0}
+.mark i{display:block;border-radius:50%;background:#00D0A3}
+/* display:none, not opacity:0 — an invisible label still occupies width, which pushed the
+   logo mark off the icon centre line. */
+.word{font-size:14px;font-weight:700;line-height:1.05;color:#101828;white-space:nowrap;letter-spacing:-.01em;
+  display:none}
+.rail:is(:hover,.pin) .word{display:block}
+.rgroup{display:flex;flex-direction:column;gap:8px;padding:0 16px}
+.rgroup.tight{gap:4px}
+.ritem{display:flex;align-items:center;gap:12px;padding:12px;border-radius:6px;background:#fff;
+  border:0;width:100%;color:#667085;white-space:nowrap;text-align:left}
+.ritem svg{width:24px;height:24px;flex-shrink:0}
+.ritem b{font-size:16px;font-weight:500;color:#344054;opacity:0;transition:opacity .14s}
+.rail:is(:hover,.pin) .ritem b{opacity:1}
+.ritem:hover{background:#F4FDFA}
+.ritem.on{background:#E9FEF9;color:#007460}
+.ritem.on b{color:#00574F}
+.rfoot{display:flex;flex-direction:column;gap:24px;padding-bottom:28px}
+.rdiv{height:1px;background:#E4E7EC;margin:0 16px}
+/* 16px puts the 48px avatar's centre on the same 40px axis as the 24px nav icons. */
+/* Decoration only — the account menu is opened from the Settings item. */
+.racct{display:flex;align-items:center;gap:12px;padding:0 16px;width:100%;cursor:default}
+.rail:is(:hover,.pin) .racct{padding:0 8px}
+.rav{width:48px;height:48px;border-radius:50%;flex-shrink:0;border:1px solid #E4E7EC;
+  background:#dfe7ed url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%2398a9b8"><circle cx="12" cy="9" r="4"/><path d="M4 21c0-4 3.6-6 8-6s8 2 8 6z"/></svg>') center/30px no-repeat}
+.racct b{font-size:14px;line-height:20px;font-weight:500;color:#101828;white-space:nowrap;
+  opacity:0;transition:opacity .14s}
+.rail:is(:hover,.pin) .racct b{opacity:1}
+
+/* account submenu — floats clear of the rail so it works in either width */
+.rsub{position:fixed;z-index:95;background:#fff;border-radius:8px;padding:8px;display:flex;
+  flex-direction:column;gap:4px;min-width:214px;
+  box-shadow:0 4px 6px -2px rgba(16,24,40,.05),0 12px 16px -4px rgba(16,24,40,.10)}
+.rsub .ritem b{opacity:1}
+.rsub .ritem.danger{color:#F97066}
+.rsub .ritem.danger b{color:#F04438}
+
+/* ---------- main ---------- */
+.main{padding:30px 34px 90px;min-width:0;margin-left:82px}
+.wrap{max-width:1180px;margin:0 auto}
+h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
+
+.toprow{display:grid;grid-template-columns:376px minmax(0,1fr);gap:20px;margin-bottom:34px;align-items:start}
+@media(max-width:980px){.toprow{grid-template-columns:1fr}}
+
+/* ---------- setup guide: a small persistent card, not a page block ----------
+   Anchored bottom-right so it never competes with the page for the top of the screen,
+   and so it can appear or disappear without the layout moving underneath it. */
+.guide{position:fixed;right:20px;bottom:76px;z-index:60;width:300px;background:#fff;border-radius:16px;
+  padding:13px 13px 11px;border:1px solid rgba(10,157,120,.18);
+  box-shadow:0 14px 36px rgba(16,30,50,.17),0 2px 6px rgba(16,30,50,.06)}
+.ghead{display:flex;align-items:center;gap:8px}
+.ghead h2{font-size:14.5px;font-weight:700;margin:0;letter-spacing:-.01em;flex:1;white-space:nowrap}
+.gcount{font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;background:#F2F4F7;
+  color:#344054;white-space:nowrap}
+.gtog{border:0;background:transparent;color:var(--ink3);padding:3px;border-radius:6px;display:grid;place-items:center}
+.gtog:hover{background:#f1f5f7;color:var(--ink2)}
+.gtog svg{width:15px;height:15px;transition:transform .18s}
+.guide.col .gtog svg{transform:rotate(180deg)}
+.gbar{height:5px;border-radius:99px;background:#eef2f5;overflow:hidden;margin:11px 0 9px}
+.gbar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#4f46e5,#6366f1);transition:width .4s}
+.glist{background:#f8fafb;border:1px solid var(--line);border-radius:11px;padding:4px;margin-top:10px}
+/* The whole row is the target, so there is no separate Open button competing with the
+   label for horizontal space — which is what forced the text onto a third line. */
+.gitem{display:flex;align-items:flex-start;gap:9px;padding:8px 9px;border-radius:9px;width:100%;
+  text-align:left;border:1px solid transparent;background:transparent;color:inherit;font:inherit}
+.gitem+.gitem{margin-top:2px}
+.gitem.act{cursor:pointer}
+.gitem.act:hover{background:#eef2f5}
+.gitem .dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+  border:1.8px solid var(--teal);background:#fff;margin-top:2px}
+.gitem .dot svg{width:9px;height:9px;color:#fff}
+.gitem.done .dot{background:var(--teal);border-color:var(--teal)}
+/* Label and its deadline stack, so the label gets the card's full width for 1–2 lines. */
+.gtxt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.gitem .lbl{font-size:13.5px;font-weight:400;line-height:1.4}
+.gitem.done .lbl{color:var(--ink2)}
+/* Every row looks the same, in both widgets. The deadline badge carries the urgency, so the
+   row itself does not need to shout as well. */
+/* Filled only — no outlined badges in the design system. multiply is a no-op on white. */
+.due{font-size:10.5px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap;
+  background:#F2F4F7;color:#344054;mix-blend-mode:multiply}
+.due.late{background:var(--od-s);color:var(--od)}
+.gfoot{font-size:12px;color:var(--ink3);padding:10px 3px 1px;line-height:1.45}
+.guide.col{width:auto;padding:9px 11px}
+.guide.col .gbar,.guide.col .glist,.guide.col .gfoot{display:none}
+.allset{position:fixed;right:20px;bottom:76px;z-index:60;background:#fff;border-radius:99px;
+  padding:9px 15px 9px 11px;display:flex;gap:9px;align-items:center;font-size:13px;
+  border:1px solid rgba(10,157,120,.18);box-shadow:0 10px 28px rgba(16,30,50,.14)}
+.allset .tick{width:20px;height:20px;border-radius:50%;background:var(--teal);display:grid;place-items:center;flex-shrink:0}
+
+/* ---------- tier card ---------- */
+.tier{background:#fff;border-radius:18px;padding:18px 20px;box-shadow:var(--sh-md);min-height:150px;
+  display:flex;flex-direction:column;justify-content:center}
+.tier .badge{display:inline-flex;align-items:center;gap:7px;background:#14273d;color:#fff;font-size:12.5px;
+  font-weight:700;padding:6px 13px;border-radius:99px;width:fit-content;margin-bottom:11px}
+.tier p{margin:0;font-size:13.5px;color:var(--ink2);line-height:1.5}
+.tier p b{color:var(--ink)}
+
+/* ---------- hero banner ---------- */
+.hero{border-radius:18px;padding:26px 28px;min-height:150px;
+  background:linear-gradient(115deg,#f4e7fb 0%,#e9e7fd 45%,#dfe9fd 100%);
+  display:flex;flex-direction:column;justify-content:center;box-shadow:var(--sh)}
+.hero h3{margin:0 0 5px;font-size:24px;font-weight:700;color:#4338ca;letter-spacing:-.02em}
+.hero p{margin:0;font-size:14.5px;color:#5b5f86;max-width:44ch}
+
+/* ---------- projects ---------- */
+.psec h2{font-size:22px;font-weight:700;letter-spacing:-.02em;margin:0}
+.psechead{display:flex;align-items:center;gap:14px;margin-bottom:16px;flex-wrap:wrap}
+.psechead .sp{flex:1}
+.segs{display:flex;gap:4px;background:#fff;border-radius:11px;padding:4px;box-shadow:var(--sh)}
+.seg{border:0;background:transparent;padding:8px 15px;border-radius:8px;font-size:14px;font-weight:600;color:var(--ink3)}
+.seg:hover{color:var(--ink2)}
+.seg.on{background:var(--teal-s);color:var(--teal-ink)}
+
+.pcard{background:#fff;border-radius:18px;padding:24px 26px 26px;box-shadow:var(--sh-md)}
+.pcardhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.pcardhead b{font-size:19px;font-weight:700;letter-spacing:-.015em}
+.pcardhead .ct{font-size:16px;color:var(--ink2);font-weight:500}
+.pcardhead .dash{font-size:15px;color:var(--ink3)}
+.pcardhead .sp{flex:1}
+.sortwrap{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink2);white-space:nowrap}
+.sortwrap select{padding:9px 34px 9px 13px;border:1px solid var(--line2);border-radius:11px;background:#fff;
+  font-size:14px;font-weight:500;appearance:none;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="%234a5a71" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>');
+  background-repeat:no-repeat;background-position:right 11px center;background-size:14px}
+.sortwrap select:focus{outline:2px solid var(--teal-s);border-color:var(--teal)}
+
+.subtabs{display:flex;gap:28px;border-bottom:1px solid var(--line);margin:18px 0 22px}
+.subtab{border:0;background:transparent;padding:0 0 12px;font-size:14.5px;font-weight:600;color:var(--ink3);
+  border-bottom:2.5px solid transparent;margin-bottom:-1px}
+.subtab:hover{color:var(--ink2)}
+.subtab.on{color:var(--teal-ink);border-bottom-color:var(--teal)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(292px,1fr));gap:22px}
+.proj{border:1px solid #eef2f5;border-radius:14px;overflow:hidden;background:#f7f9fb;text-align:left;
+  padding:0;width:100%;transition:.14s}
+/* Lift only. Recolouring the card on hover read as a state change rather than a pointer cue. */
+.proj:hover{box-shadow:0 6px 20px rgba(16,30,50,.11)}
+.projtop{display:flex;align-items:flex-start;gap:11px;padding:16px 16px 14px}
+.projtop .ic{width:28px;height:28px;border-radius:50%;background:#3d4c60;color:#fff;display:grid;
+  place-items:center;flex-shrink:0;margin-top:1px}
+.projtop .ic svg{width:15px;height:15px}
+.projtop b{flex:1;font-size:15.5px;font-weight:700;line-height:1.32}
+.projtop .car{color:var(--ink3);font-size:17px;line-height:1;margin-top:4px}
+.projlock{display:flex;align-items:center;gap:8px;margin:0 15px 12px;padding:6px 10px;border-radius:8px;
+  background:var(--od-s);color:var(--od);font-size:12.5px;font-weight:600}
+.projlock svg{width:13px;height:13px;flex:none}
+.prow{display:flex;justify-content:space-between;gap:10px;padding:9px 16px;border-top:1px solid #e6ecf0;font-size:13.5px}
+.prow .k{color:var(--ink2)}
+.prow .v{font-weight:600;text-align:right;white-space:nowrap}
+.stars{color:#f0b429;letter-spacing:1.5px;font-size:12px}
+.stars .dim{color:#dbe2e8}
+.flags{font-size:13px;font-weight:500}
+
+.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin-top:26px}
+.pgb{border:1px solid var(--line2);background:#fff;border-radius:99px;padding:9px 18px;font-size:14px;
+  font-weight:600;color:var(--ink2);display:inline-flex;align-items:center;gap:8px}
+.pgb:hover:not(:disabled){background:#f5f8f9}
+.pgb:disabled{color:#c6ced6;cursor:not-allowed}
+.pgn{border:0;background:transparent;width:36px;height:36px;border-radius:10px;font-size:14px;
+  font-weight:600;color:var(--ink2)}
+.pgn:hover{background:#f2f5f8}
+.pgn.on{background:var(--teal-s);color:var(--teal-ink)}
+.pempty{padding:44px 16px;text-align:center;color:var(--ink3);font-size:14px}
+.dashgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:24px;align-items:start}
+@media(max-width:1180px){.dashgrid{grid-template-columns:1fr}.dashside{display:none}}
+.dashside{border-radius:18px;overflow:hidden;min-height:640px;padding:20px;display:flex;
+  flex-direction:column;gap:14px;
+  background:#4f6fd8 url('data:image/jpeg;base64,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') center bottom/cover no-repeat}
+.sidecard{background:#fff;border-radius:14px;padding:16px 18px;box-shadow:var(--sh-md)}
+.sidecard b{font-size:24px;font-weight:700;letter-spacing:-.02em}
+.sidecard .sl2{font-size:13px;color:var(--ink2);margin-top:2px}
+.sidecard .ms{font-size:12px;color:var(--ink3);margin-top:6px}
+.dashhead{position:relative;display:flex;align-items:center;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+.dashhead .sp{flex:1}
+.dashsel{border:0;background:transparent;font-size:24px;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink);display:inline-flex;align-items:center;gap:10px;padding:4px 8px;border-radius:10px}
+.dashsel:hover{background:#eef3f6}
+.dashsel svg{width:19px;height:19px;color:var(--ink3)}
+.dashmenu{position:absolute;top:100%;left:0;z-index:70;background:#fff;border-radius:12px;padding:6px;
+  min-width:340px;box-shadow:0 4px 6px -2px rgba(16,24,40,.05),0 12px 16px -4px rgba(16,24,40,.10);
+  display:flex;flex-direction:column;gap:2px;max-height:340px;overflow:auto}
+.dashopt{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:transparent;
+  padding:10px 12px;border-radius:9px;font-size:14.5px;color:var(--ink)}
+.dashopt:hover{background:#f2f6f9}
+.dashopt span:first-child{flex:1}
+.lockchip{display:inline-flex;align-items:center;gap:6px;background:var(--od-s);color:var(--od);
+  font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap}
+.lockchip svg{width:12px;height:12px;flex:none}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:16px}
+.metric{background:#fff;border-radius:16px;padding:18px 20px;box-shadow:var(--sh-md)}
+.metric b{font-size:30px;font-weight:700;letter-spacing:-.02em;display:block}
+.metric .ml{font-size:14px;color:var(--ink2);margin-top:2px}
+.metric .ms{font-size:12.5px;color:var(--ink3);margin-top:8px}
+.dashtbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.dashtbl th{text-align:left;font-weight:600;color:var(--ink2);padding:10px 12px;border-bottom:1px solid var(--line)}
+.dashtbl td{padding:12px;border-bottom:1px solid var(--line)}
+.dashtbl tr:last-child td{border-bottom:0}
+.dashgrid.solo{grid-template-columns:minmax(0,1fr)}
+.secttl{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:6px 0 14px}
+.chartkey{display:flex;gap:18px;font-size:12.5px;color:var(--ink2);margin-bottom:10px}
+.chartkey span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:99px;margin-right:7px}
+.chartkey .k1::before{background:#2e90fa}.chartkey .k2::before{background:#d444a6}
+.chartkey .k3::before{background:#6172f3}
+.chartph{border-radius:12px;background:linear-gradient(180deg,#fbfdff,#f4f8fb);padding:14px 8px 8px}
+.chartph svg{display:block;width:100%;height:190px}
+.chartx{display:flex;justify-content:space-between;padding:8px 4px 2px;font-size:11.5px;color:var(--ink3)}
+.cgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+.cpanel{background:#fafbfe;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
+.cph{font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--ink2);margin-bottom:10px}
+.crow{display:flex;align-items:center;gap:16px;padding:10px 0;font-size:13.5px;
+  border-bottom:1px solid var(--line)}
+.crow:last-child{border-bottom:0}
+.crow .sp{flex:1}
+.crow.chd{font-size:11.5px;color:var(--ink3);text-transform:uppercase;letter-spacing:.05em}
+.cdot{width:13px;height:13px;border-radius:99px;flex:none}
+.cdot.ok{background:#12b76a}.cdot.warn{background:#f79009}.cdot.bad{background:#f04438}
+.cbig{padding:12px 0 4px;border-bottom:1px solid var(--line);margin-bottom:4px}
+.cbig b{font-size:32px;font-weight:700;letter-spacing:-.02em}
+.cdelta{font-size:12px;font-weight:600;color:#12b76a;margin-left:10px}
+.cdot.sm{width:9px;height:9px}
+.chartkey .k4::before{background:#c3cdd8}
+.cardhd{display:flex;align-items:center;gap:14px;margin:4px 0 10px;flex-wrap:wrap}
+.cardhd .sp{flex:1}
+.selpill{border:1px solid var(--line2);background:#fff;border-radius:10px;padding:9px 13px;
+  font-size:13.5px;display:inline-flex;align-items:center;gap:8px;color:var(--ink)}
+.selpill:hover{background:#f7fafc}
+.selpill svg{width:15px;height:15px;color:var(--ink3);flex:none}
+/* ---------- insights rail ---------- */
+.dashside.plain{background:none;min-height:0;padding:0}
+.railttl{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px;display:flex;
+  flex-direction:column}
+.railttl .ms{font-size:12px;color:var(--ink3);font-weight:400;margin-top:4px}
+.relcard{background:#fff;border-radius:16px;padding:16px 18px;box-shadow:var(--sh-md)}
+.relhd{display:flex;align-items:center;gap:9px;font-size:14px;color:var(--ink2);margin-bottom:12px}
+.relhd svg{width:16px;height:16px;flex:none}
+.relbig{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.relpill{font-size:26px;font-weight:700;padding:5px 16px;border-radius:12px;letter-spacing:-.02em}
+.relpill.good{background:#e7f8f1;color:#0a7a5c}
+.relpill.bad{background:#fdeceb;color:#c8372a}
+.relstar{font-size:11px;font-weight:700;color:#b45309}
+.relsub{font-size:12px;color:var(--ink3);margin-top:10px}
+.relsub b{color:var(--ink2);font-weight:600}
+/* ---------- average handle time ---------- */
+.ahtgrid{display:grid;grid-template-columns:236px minmax(0,1fr);gap:16px;margin-top:22px;
+  align-items:stretch}
+@media(max-width:1000px){.ahtgrid{grid-template-columns:1fr}}
+.ahtcard{border-radius:18px;padding:22px 20px;color:#fff;display:flex;flex-direction:column;gap:20px;
+  background:linear-gradient(158deg,#12a596,#0b7a83 58%,#0e5f77)}
+.ahtcard .n{font-size:27px;font-weight:700;letter-spacing:-.02em;display:block}
+.ahtcard .l{font-size:12.5px;opacity:.88;margin-top:3px;display:flex;align-items:center;gap:6px}
+.ahtcard .l svg{width:14px;height:14px}
+.ahtcard .goal{background:rgba(255,255,255,.17);border-radius:14px;padding:13px 15px;margin-top:auto}
+.ahttbl{width:100%;border-collapse:collapse;font-size:13px}
+.ahttbl th{font-weight:600;color:var(--ink2);text-align:center;padding:8px;font-size:12px;
+  line-height:1.35;vertical-align:bottom}
+.ahttbl th:first-child{text-align:left;width:34%}
+.ahttbl td{padding:13px 8px;text-align:center;border-top:1px solid var(--line);
+  font-size:17px;font-weight:700;letter-spacing:-.02em}
+.ahttbl td:first-child{text-align:left}
+.ahttbl .u{font-size:11px;font-weight:500;color:var(--ink3);display:block;margin-top:1px}
+.ahttbl .lo{color:#c8372a}.ahttbl .hi{color:#0a7a5c}
+.ahtwho{display:flex;align-items:center;gap:10px;color:var(--ink)}
+.ahtwho svg{width:22px;height:22px;color:var(--ink3);flex:none}
+.ahtwho b{font-size:15px;font-weight:700;display:block}
+.ahtwho i{font-size:12px;font-style:normal;color:var(--ink3);font-weight:400}
+/* ---------- leaderboard ---------- */
+.lbchip{background:#eef4ff;color:#3538cd;font-size:12.5px;font-weight:600;padding:5px 11px;
+  border-radius:99px}
+.rank{width:28px;height:28px;border-radius:99px;display:grid;place-items:center;background:#eef4ff;
+  font-size:12.5px;font-weight:700;color:#3538cd}
+.lbname{display:flex;align-items:center;gap:9px;font-weight:600}
+.lbname .av{width:24px;height:24px;border-radius:99px;background:#e8eef1;color:var(--ink2);
+  font-size:9.5px;font-weight:700;display:grid;place-items:center;flex:none}
+.mchip{display:inline-block;background:#F2F4F7;color:#344054;font-size:11px;padding:3px 8px;
+  border-radius:6px;margin:4px 5px 0 0}
+/* ---------- coaching feedback ---------- */
+.fbbanner{margin-top:22px;border-radius:18px 18px 0 0;padding:20px 26px 44px;
+  background:linear-gradient(99deg,#19b9ab 4%,#5a6ee6 58%,#63aee8 100%)}
+.fbbanner h3{margin:0;font-size:20px;font-weight:700;color:#0d2b3c;letter-spacing:-.02em}
+.pcard.fbcard{margin-top:-26px;border-radius:18px}
+.filtbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.fbcount{font-size:12.5px;color:var(--ink3);margin:14px 0 2px}
+.dashtbl tr.sel td{background:var(--teal-s)}
+.fbdot{width:17px;height:17px;border-radius:99px;background:#12b76a;color:#fff;font-size:11px;
+  font-weight:700;display:grid;place-items:center}
+.fbmeta{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.fbtile{border:1px solid var(--line2);border-radius:12px;padding:9px 15px;min-width:140px}
+.fbtile .l{font-size:11.5px;color:var(--ink3);display:flex;gap:6px;align-items:center}
+.fbtile .l svg{width:13px;height:13px}
+.fbtile b{font-size:14px;font-weight:600;display:block;margin-top:3px}
+.fbids{font-size:12.5px;color:var(--ink3);line-height:1.7}
+.fbids b{color:var(--ink);font-weight:600}
+.fbgrid{display:grid;grid-template-columns:minmax(0,1fr) 258px;gap:22px}
+@media(max-width:1000px){.fbgrid{grid-template-columns:1fr}}
+.fbhd{display:flex;align-items:center}
+.fbhd .sp{flex:1}
+.fbtag{display:inline-block;background:#F2F4F7;color:#344054;font-size:10.5px;font-weight:700;
+  letter-spacing:.06em;padding:3px 8px;border-radius:5px}
+.fbnote{font-size:13.5px;line-height:1.62;color:var(--ink2);margin:9px 0 20px}
+.worknow{display:flex;align-items:center;gap:14px;border:1px solid #bfe6d7;background:var(--teal-s);
+  border-radius:12px;padding:15px 18px}
+.worknow b{font-size:15px}
+.worknow .meta{font-size:13px;color:var(--teal-ink);margin-top:2px}
+.worknow .sp{flex:1}
+.workclean{font-size:12.5px;color:var(--ink3);margin:16px 2px 0;max-width:70ch}
+.workfoot{display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-top:1px solid var(--line);
+  margin-top:22px;padding-top:20px}
+
+.notice{margin-bottom:20px;background:var(--teal-s);border:1px solid #bfe6d7;border-radius:11px;
+  padding:12px 15px;font-size:13.5px;color:var(--teal-ink);display:flex;gap:9px;align-items:flex-start}
+.notice svg{width:16px;height:16px;flex-shrink:0;margin-top:1px}
+
+/* ---------- settings / legal ---------- */
+.sheet{background:#fff;border-radius:20px;padding:30px 34px 40px;box-shadow:var(--sh-md)}
+.sheet h1{font-size:26px;font-weight:700;margin:0 0 22px;letter-spacing:-.02em}
+.setgrid{display:grid;grid-template-columns:210px minmax(0,1fr);gap:0}
+@media(max-width:840px){.setgrid{grid-template-columns:1fr}}
+.setnav{border-right:1px solid var(--line);padding-right:18px;display:flex;flex-direction:column;gap:2px}
+.setnav button{border:0;background:transparent;text-align:left;padding:9px 12px;border-radius:9px;
+  font-size:14.5px;color:var(--ink2);display:flex;align-items:center}
+.setnav button:hover{background:#f4f7f9;color:var(--ink)}
+.setnav button.on{background:var(--teal-s);color:var(--teal-ink);font-weight:600}
+.setbody{padding-left:28px}
+.setbody h2{font-size:20px;font-weight:700;margin:0 0 22px;letter-spacing:-.015em}
+.setbody h3{font-size:16.5px;font-weight:700;margin:0 0 13px}
+.docgroup{margin-bottom:30px}
+/* Renamed from .proj — it collided with the project-card selector, so hovering this group
+   picked up the card's lift. */
+/* One light card per project, so the grey does the separating. */
+.projgrp{background:#f7f9fb;border:1px solid var(--line);border-radius:14px;padding:16px 16px 6px;
+  margin-bottom:14px}
+.projgrp:last-child{margin-bottom:0}
+.projgrp-nm{font-size:14.5px;font-weight:700;margin-bottom:12px}
+.projgrp .docrow{margin-bottom:10px}
+.projgrp .prev{margin:-2px 0 12px 2px}
+/* The version list belongs to the tile above it, so the gap inside the pair has to be smaller
+   than the gap to the next document — otherwise the rows read as a separate block that happens
+   to sit underneath. The negative margin eats most of the tile's own margin-bottom; the space
+   between documents is set by the margin-top on each following tile. */
+.vlist{margin:-6px 0 0;padding:0 16px}
+.vrow{display:flex;align-items:center;gap:14px;padding:9px 0;font-size:13.5px;color:var(--ink2);
+  border-bottom:1px solid var(--line)}
+.vrow:first-child{padding-top:5px}
+.vrow:last-child{border-bottom:0}
+.vrow b{color:var(--ink);font-weight:600}
+.vrow .sp{flex:1}
+.vrow a{color:var(--teal);font-weight:600;white-space:nowrap}
+.vrow a:hover{text-decoration:underline}
+.docrow{display:flex;align-items:center;gap:14px;border:1px solid var(--line2);border-radius:11px;
+  padding:13px 16px;margin-bottom:11px;background:#fff}
+.docrow.act{border-color:#bfe3d6}
+.docrow .nm{flex:1;min-width:0}
+.docrow .nm b{display:block;font-size:14.5px;font-weight:600}
+.docrow .meta{font-size:12.5px;color:var(--ink3);margin-top:3px}
+.tag{font-size:12.5px;font-weight:700;padding:5px 12px;border-radius:99px;white-space:nowrap}
+.tag.need{background:var(--amber-s);color:var(--amber)}
+.tag.ok{background:var(--teal-s);color:var(--teal-ink)}
+/* Once signed, the useful fact is when — not that it happened. Same pill metrics as the
+   "Needs signature" tag, so signed and unsigned rows line up. */
+.signedon{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;
+  color:#00574F;background:#E9FEF9;border-radius:99px;padding:5px 13px;
+  white-space:nowrap;flex-shrink:0}
+.signedon svg{width:12px;height:12px;flex:none;color:#0BB98A}
+.tag.miss{background:var(--amber-s);color:var(--amber)}
+.docrow .sign{border:1px solid var(--teal);background:#fff;color:var(--teal-ink);font-weight:600;
+  font-size:13px;padding:7px 13px;border-radius:8px}
+.docrow .sign:hover{background:var(--teal-s)}
+/* the whole tile is the target now, so there is no button inside it */
+.docrow.clickable{cursor:pointer;width:100%;text-align:left;font:inherit;color:inherit;transition:.13s}
+.docrow.clickable:hover{border-color:#bfe3d6;background:#f7fdfb;box-shadow:0 3px 10px rgba(10,157,120,.08)}
+
+/* "Incomplete section" hint on the Legal nav item */
+.ihint{position:relative;display:grid;place-items:center;width:17px;height:17px;border-radius:50%;
+  border:1.5px solid #96a7b6;color:#5d7183;font-size:10.5px;font-weight:700;margin-left:8px;
+  flex-shrink:0;cursor:help}
+.ihint .tip{position:absolute;left:calc(100% + 11px);top:50%;transform:translateY(-50%);
+  background:#14273d;color:#fff;font-size:13.5px;font-weight:500;padding:10px 16px;border-radius:10px;
+  white-space:nowrap;opacity:0;visibility:hidden;transition:.12s;z-index:120;
+  box-shadow:0 8px 22px rgba(16,30,50,.22)}
+.ihint .tip::before{content:'';position:absolute;right:100%;top:50%;transform:translateY(-50%);
+  border:7px solid transparent;border-right-color:#14273d}
+.ihint:hover .tip,.ihint:focus-visible .tip{opacity:1;visibility:visible}
+
+/* ---------- document view (sign / review) ---------- */
+.docview h2{font-size:20px;font-weight:700;letter-spacing:-.015em;margin:0 0 24px}
+.backlink{border:0;background:transparent;color:var(--teal);font-weight:600;font-size:13.5px;padding:0;
+  display:inline-flex;align-items:center;gap:7px;margin-bottom:14px}
+.backlink:hover{text-decoration:underline}
+.backlink svg{width:15px;height:15px}
+.paperframe{border:1px solid #e4eaef;padding:8px;background:#fdfefe;border-radius:3px}
+.paperpg{background:#fff;border:1px solid #eef2f5;padding:42px 52px 56px;min-height:600px}
+.paperpg .aologo{display:flex;justify-content:center;align-items:center;gap:10px;margin-bottom:30px}
+.paperpg .aologo .mark{width:26px;height:26px;opacity:1}
+.paperpg .aologo b{font-size:16px;font-weight:700;line-height:1.05;color:#14273d;letter-spacing:-.01em}
+.paperpg h5{text-align:center;font-size:12.5px;font-weight:700;letter-spacing:.03em;margin:0 0 30px}
+.paperpg p{font-size:11.8px;line-height:1.66;margin:0 0 10px;text-align:justify;color:#1d2b3d}
+.paperpg .cl{font-weight:700;margin:16px 0 8px;text-align:left}
+.paperpg .ind{padding-left:46px;text-indent:-46px}
+.paperpg u{text-decoration:underline}
+
+.sigsec{margin-top:32px}
+.sigsec h3{font-size:17.5px;font-weight:600;margin:0 0 18px;letter-spacing:-.01em}
+.fld label{display:block;font-size:13.5px;color:var(--ink2);margin-bottom:8px}
+.fld input{width:100%;padding:13px 15px;border:1px solid var(--line2);border-radius:10px;font-size:15px}
+.fld input:focus{outline:2px solid var(--teal-s);border-color:var(--teal)}
+.fld input:disabled{background:#f7f9fb;color:var(--ink3);cursor:default}
+.chkrow{display:flex;align-items:flex-start;gap:11px;margin-top:22px;font-size:15px}
+.chkrow input{width:17px;height:17px;accent-color:var(--teal);margin-top:3px;flex-shrink:0}
+.chkrow label{cursor:pointer}
+.chkrow input:disabled+label{color:var(--ink2);cursor:default}
+.sigdiv{height:1px;background:var(--line);margin:26px 0 22px}
+.sigfoot{display:flex;justify-content:flex-end}
+.btn.sq{border-radius:9px;padding:13px 30px}
+.verchip{display:inline-block;font-size:12.5px;font-weight:500;padding:4px 11px;border-radius:99px;
+  background:#F2F4F7;color:#344054;margin-left:12px;vertical-align:3px}
+.verchip.cur{background:var(--teal-s);color:var(--teal-ink)}
+.docscope{font-size:13px;color:var(--ink3);margin:-16px 0 22px}
+.notice.plain{background:#f8fafb;border-color:var(--line2);color:var(--ink2)}
+/* Same grey as the acceptance label above it — it is a record, not a status to shout about. */
+.signedline{font-size:15px;color:var(--ink2)}
+
+.prev{border:0;background:transparent;color:var(--teal);font-weight:600;font-size:13.5px;padding:2px 0;
+  display:inline-flex;align-items:center;gap:6px}
+.prev:hover{text-decoration:underline}
+.prev svg{width:13px;height:13px;transition:transform .16s}
+.prev.open svg{transform:rotate(180deg)}
+.oldbox{margin:12px 0 0;border-left:2px solid var(--line2);padding:2px 0 2px 16px}
+.oldnote{font-size:12.5px;color:var(--ink3);margin:0 0 8px;line-height:1.5;max-width:64ch}
+.oldrow{display:flex;align-items:center;gap:12px;font-size:13.5px;color:var(--ink2);padding:9px 0;
+  border-bottom:1px solid var(--line)}
+.oldrow:last-child{border-bottom:0}
+.oldrow b{color:var(--ink);font-weight:600}
+.oldrow .sp{flex:1}
+.prev.showall{margin-top:13px;font-size:13px}
+.yeargrp+.yeargrp .yearhd{padding-top:15px}
+.yearhd{font-size:12px;font-weight:700;color:var(--ink2);letter-spacing:.04em;padding:2px 0 5px;
+  display:flex;align-items:center;gap:7px}
+.yearhd span{font-weight:500;color:var(--ink3);letter-spacing:0}
+.scopenote{font-size:12.5px;color:var(--ink3);margin:-6px 0 16px}
+
+/* ---------- buttons ---------- */
+.btn{border-radius:99px;padding:11px 22px;font-size:14.5px;font-weight:600;border:1px solid var(--line2);
+  background:#fff;color:var(--ink2)}
+.btn:hover{background:#f5f8f9}
+.btn.pri{background:linear-gradient(99deg,#009170 29.48%,#3538CD 133.95%);border-color:transparent;color:#fff;
+  box-shadow:0 2px 8px rgba(0,145,112,.26)}
+.btn.pri:hover{filter:brightness(1.07)}
+/* Same ramp at low opacity, so disabled reads as the same button rather than a grey one. */
+.btn.pri:disabled{background:linear-gradient(99deg,rgba(0,145,112,.34) 29.48%,rgba(53,56,205,.34) 133.95%);
+  box-shadow:none;color:#fff;cursor:not-allowed}
+.btn.ghost{background:#fff;border-color:var(--teal);color:var(--teal-ink)}
+.btn.ghost:hover{background:var(--teal-s)}
+.btn.sm{padding:8px 16px;font-size:13.5px}
+
+/* ---------- modals ---------- */
+.scrim{position:fixed;inset:0;background:rgba(22,38,60,.52);z-index:100;display:grid;place-items:center;
+  padding:28px;overflow:auto}
+.modal{background:#fff;border-radius:20px;box-shadow:var(--sh-lg);width:min(830px,100%);
+  max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+.mhead{padding:26px 30px 0;position:relative;flex-shrink:0}
+.mhead h3{margin:0;font-size:20px;font-weight:700;letter-spacing:-.015em;padding-right:44px}
+.x{position:absolute;right:20px;top:20px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line2);
+  background:#fff;color:var(--ink3);display:grid;place-items:center;padding:0}
+.x svg{width:13px;height:13px}
+.x:hover{color:var(--ink);border-color:var(--ink3)}
+.mbody{padding:20px 30px 24px;overflow:auto}
+.mfoot{padding:16px 30px 22px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+  border-top:1px solid var(--line);flex-shrink:0}
+.mfoot .sp{flex:1}
+.footnote{font-size:13.5px;color:var(--amber);flex:1;min-width:200px;line-height:1.45}
+.footnote.late{color:var(--od)}
+
+/* project-detail modal extras */
+.mhead .titlerow{display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding-right:44px}
+.mhead .titlerow h3{padding-right:0}
+.statepill{display:inline-flex;align-items:center;gap:7px;font-size:13.5px;font-weight:600;
+  padding:5px 13px;border-radius:99px;background:var(--amber-s);color:#c2620a;white-space:nowrap}
+.statepill i{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0}
+.tcount{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 6px;border-radius:99px;
+  background:#eef2f5;color:var(--ink2);font-size:12.5px;font-weight:600;margin-left:8px;vertical-align:middle}
+.typeic{width:20px;height:20px;border-radius:50%;background:#3d4c60;color:#fff;display:inline-grid;
+  place-items:center;margin-left:8px;vertical-align:-5px}
+.typeic svg{width:12px;height:12px}
+.flagrow{display:flex;gap:26px;flex-wrap:wrap;font-weight:500}
+.skillsec{margin-top:24px}
+.skillsec h4{font-size:16.5px;font-weight:700;margin:0 0 12px}
+.skillgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:12px}
+.skill{border:1px solid var(--line2);border-radius:11px;padding:12px 14px}
+.skill b{display:block;font-size:14px;font-weight:600;margin-bottom:7px}
+.skill .st{font-size:13.5px;color:var(--ink2);display:inline-flex;align-items:center;gap:6px}
+.skill .st svg{width:14px;height:14px;color:var(--teal)}
+.skill .take{font-size:13.5px;color:var(--teal-ink);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+
+.dtable{border-top:1px solid var(--line)}
+.dtable .r{display:flex;gap:16px;padding:11px 0;border-bottom:1px solid var(--line);font-size:14.5px}
+.dtable .r .k{width:150px;flex-shrink:0;color:var(--ink2)}
+.dtable .r .v{flex:1;font-weight:600}
+.pdesc{margin-top:22px}
+.pdesc h4{font-size:16.5px;font-weight:700;margin:0 0 9px}
+.pdesc p{margin:0 0 11px;color:var(--ink2);font-size:14.5px}
+.pdesc ul{margin:0;padding-left:20px;color:var(--ink2);font-size:14.5px}
+.pdesc li{margin-bottom:4px}
+
+/* requirement block inside project modal */
+/* Sits directly under the project details so it is visible without scrolling. */
+.reqs{margin:22px 0 4px;border:1px solid var(--amber-line);background:var(--amber-s);border-radius:14px;
+  padding:15px 17px}
+.reqs.softonly{border-color:var(--line2);background:#f8fafb}
+.reqs h4{margin:0 0 4px;font-size:15px;font-weight:700}
+.reqs .sub{font-size:13px;color:var(--ink2);margin-bottom:12px}
+/* Everything in the row centres on the same axis — icon, text, button. Most rows are now a
+   single line of text sitting next to a 28px icon and a button, so top-aligning the text left it
+   riding above both. The tallest case left is three short lines (bank & tax), which still reads
+   correctly centred. */
+.req{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line2);
+  border-radius:11px;padding:13px 15px;margin-bottom:9px}
+.req:last-child{margin-bottom:0}
+/* Always the same neutral document mark. The badge carries the urgency; the icon just says
+   "this is a contract". */
+.req .ri{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
+  background:#F1F3F7;color:#475569}
+.req .ri svg{width:15px;height:15px}
+.req .ri.ok{background:var(--teal-s);color:var(--teal)}
+.req .rt{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;gap:7px}
+.req .rt b{font-size:14px;font-weight:600;line-height:1.4}
+.req .rt .reqsub{font-size:12.5px;color:var(--ink3)}
+.req .chip{margin-left:0}
+.chiprow{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+.req>.btn{align-self:center;flex-shrink:0}
+.chip{display:inline-block;font-size:11.5px;font-weight:500;padding:3px 9px;border-radius:99px;
+  background:#F2F4F7;color:#344054;margin-left:7px;vertical-align:1px}
+/* One chip left in the product — the account prerequisite on bank & tax — so there is no
+   longer a second variant to distinguish it from. */
+.chip.all{background:#F2F4F7;color:#344054}
+
+/* ---------- doc viewer ---------- */
+.viewer{background:#fff;border-radius:18px;box-shadow:var(--sh-lg);width:min(940px,100%);height:min(88vh,860px);
+  display:flex;flex-direction:column;overflow:hidden}
+.vhead{background:#f4f7f9;border-bottom:1px solid var(--line);padding:14px 18px;display:flex;
+  align-items:center;gap:14px;flex-shrink:0}
+.vhead .vt{flex:1;text-align:center;font-size:16px;font-weight:700}
+.vpaper{flex:1;overflow:auto;background:#eef2f5;padding:26px}
+.vdoc{max-width:660px;margin:0 auto;box-shadow:var(--sh-md)}
+.vpager{margin:22px 0 4px}
+.paper{background:#fff;max-width:660px;margin:0 auto;padding:44px 52px;box-shadow:var(--sh-md);
+  font-size:12.5px;line-height:1.65;color:#2b3a4e}
+.paper h5{margin:0 0 14px;font-size:14px;text-align:center;text-transform:uppercase;letter-spacing:.04em;
+  border-bottom:1.5px solid #2b3a4e;padding-bottom:7px}
+.paper b.cl{display:block;margin:15px 0 4px;font-size:12.5px}
+.paper p{margin:0 0 9px}
+
+/* ---------- sign dialog ---------- */
+.signbox{background:#fff;border-radius:18px;box-shadow:var(--sh-lg);width:min(430px,100%);padding:24px 26px 22px;
+  position:relative}
+.signbox .ok{width:36px;height:36px;border-radius:50%;background:var(--teal-s);color:var(--teal);
+  display:grid;place-items:center;margin-bottom:14px}
+.signbox .ok svg{width:19px;height:19px}
+.signbox h4{margin:0 0 6px;font-size:17px;font-weight:700}
+.signbox p{margin:0 0 16px;font-size:13.5px;color:var(--ink2);line-height:1.5}
+/* Direct children only. As plain descendant selectors these also matched the checkbox row,
+   stretching the checkbox to 100% width and shoving its label out of the dialog. */
+.signbox>label{display:block;font-size:12.5px;font-weight:600;margin-bottom:6px}
+.signbox>input{width:100%;padding:11px 13px;border:1px solid var(--line2);border-radius:10px;font-size:14.5px}
+.signbox>input:focus{outline:2px solid var(--teal-s);border-color:var(--teal)}
+.signbox .chkrow{margin-top:16px;font-size:14px;line-height:1.45}
+.signbox .row{display:flex;gap:10px;margin-top:18px}
+.signbox .row .btn{flex:1;justify-content:center}
+
+/* ---------- toast ---------- */
+/* ---------- contract gate ----------
+   Sits over the portal rather than replacing it, so the agent keeps their bearings. It is not
+   a modal though: no X, no click-outside, no Escape. Log out and support live inside it, or
+   an agent who disputes the terms would be trapped behind the scrim with nobody to ask. */
+/* ---------- project modal blocker ---------- */
+/* Inset from the left by exactly the rail's width, so the rail stays clickable. The rail grows
+   to 232px on hover and sits at z-index 80, above this — which is what keeps the nav usable. */
+.projscrim{position:fixed;left:82px;top:0;right:0;bottom:0;z-index:60;
+  background:rgba(226,236,241,.82);overflow:auto;padding:76px 34px 40px;
+  display:flex;justify-content:center;align-items:flex-start}
+.projmodal{width:min(540px,100%);background:#fff;border-radius:18px;padding:28px 30px 26px;
+  box-shadow:0 24px 60px -12px rgba(16,30,50,.28)}
+.projmodal h3{margin:0 0 10px;font-size:20px;font-weight:700;letter-spacing:-.02em}
+.projmodal p{margin:0 0 18px;font-size:14.5px;line-height:1.55;color:var(--ink2)}
+.mdocs{border:1px solid var(--line2);border-radius:12px;overflow:hidden;margin-bottom:24px}
+.mdoc{display:flex;align-items:center;gap:13px;padding:14px 16px;
+  border-bottom:1px solid var(--line2)}
+.mdoc:last-child{border-bottom:0}
+.mdoc .ri{width:34px;height:34px;border-radius:9px;background:#f1f4f7;color:var(--ink2);
+  display:grid;place-items:center;flex:none}
+.mdoc .ri svg{width:16px;height:16px}
+.mdoc b{display:block;font-size:14.5px;font-weight:600}
+.mdoc i{font-size:12.5px;font-style:normal;color:var(--ink3)}
+.btn.wide{width:100%;justify-content:center}
+.mswitch{position:relative;margin-top:20px;padding-top:18px;border-top:1px solid var(--line);
+  display:flex;align-items:center;gap:14px}
+.mswitch .ml{font-size:13.5px;color:var(--ink2);flex:none}
+.mpick{flex:1;min-width:0;border:1px solid var(--line2);background:#fff;border-radius:10px;
+  padding:11px 14px;font-size:14px;font-weight:600;color:var(--ink);
+  display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mpick:hover{background:#f7fafc}
+.mpick span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mpick svg{width:15px;height:15px;color:var(--ink3);flex:none}
+.mswitch .dashmenu{top:auto;bottom:calc(100% - 6px);left:auto;right:0;min-width:100%}
+.scopetag.alt{background:#eef4ff;color:#3538cd}
+.gateinline{padding:0;overflow:hidden}
+.gateinline .gatehead{padding-top:24px}
+.gatescrim{position:fixed;inset:0;z-index:400;background:rgba(224,235,240,.74);
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  display:grid;place-items:center;padding:26px;overflow:auto}
+.gatemodal{background:#fff;border-radius:20px;box-shadow:var(--sh-lg);width:min(880px,100%);
+  max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+.gatehead{padding:24px 30px 0;flex-shrink:0}
+.gatehead h3{margin:0 0 7px;font-size:20px;font-weight:700;letter-spacing:-.015em;
+  display:flex;align-items:center;gap:11px;flex-wrap:wrap}
+.gatehead p{margin:0;font-size:14px;color:var(--ink2);line-height:1.55;max-width:74ch}
+.gatebody{padding:20px 30px 6px;overflow:auto}
+.gatefoot{border-top:1px solid var(--line);padding:14px 30px 18px;display:flex;align-items:center;
+  gap:8px;flex-wrap:wrap;flex-shrink:0}
+.gatefoot .sp{flex:1}
+.gatefoot .lnk{border:0;background:transparent;color:var(--ink2);font-size:13.5px;font-weight:600;
+  padding:9px 12px;border-radius:9px}
+.gatefoot .lnk:hover{background:#f2f5f8;color:var(--ink)}
+.toasts{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:520;display:flex;
+  flex-direction:column;gap:9px;align-items:center;pointer-events:none}
+.toast{background:#14273d;color:#fff;border-radius:11px;padding:12px 18px;font-size:14px;
+  box-shadow:var(--sh-lg);display:flex;gap:10px;align-items:center;animation:tin .22s ease}
+.toast svg{width:16px;height:16px;color:#4ade9b;flex-shrink:0}
+@keyframes tin{from{opacity:0;transform:translateY(9px)}}
+
+/* ---------- prototype controls: one low pill strip, out of the way ---------- */
+/* Single row, always. Wrapping turned the pill into a blob, so it scrolls instead. */
+/* Above the platform gate. The strip is not part of the product — it is the control panel for
+   demoing it — so being trapped behind the very scrim it sets up would make it useless. */
+.strip{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:500;
+  background:#22303f;color:#fff;border-radius:99px;padding:6px 8px;display:flex;align-items:center;gap:6px;
+  box-shadow:0 12px 32px rgba(16,30,50,.30);font-size:12px;flex-wrap:nowrap;
+  max-width:calc(100vw - 24px);overflow-x:auto;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.scopetag{background:rgba(11,185,138,.18);color:#7ff0cd;font-size:11px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;padding:5px 11px;border-radius:99px;white-space:nowrap}
+.strip .sl{color:#8ba0b5;padding:0 2px 0 7px;white-space:nowrap;font-weight:600;letter-spacing:.02em}
+.segwrap{display:flex;background:rgba(255,255,255,.09);border-radius:99px;padding:2px;gap:1px}
+.sb{border:0;background:transparent;color:#c3d1de;padding:6px 10px;border-radius:99px;font-size:12px;
+  font-weight:600;white-space:nowrap}
+.sb:hover{color:#fff}
+.sb.on{background:var(--teal);color:#fff}
+.pb{border:1px solid rgba(255,255,255,.22);background:transparent;color:#fff;border-radius:99px;
+  padding:6px 12px;font-size:12px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.pb:hover{background:rgba(255,255,255,.13)}
+.pb.act{background:rgba(255,255,255,.16);border-color:transparent}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <aside class="rail" id="rail"></aside>
+
+  <main class="main"><div class="wrap" id="view"></div></main>
+</div>
+
+<div id="gate"></div>
+<div id="railsub"></div>
+<div id="overlay"></div>
+<div class="toasts" id="toasts"></div>
+
+<div id="strip"></div>
+
+</div>
+
+<script>
+/* ============================================================
+   STATE
+   ============================================================ */
+const TODAY = new Date('2026-09-08T00:00:00Z');   // UTC so addDays never drifts a day
+const fmt = iso => {
+  const [y,m,d] = iso.split('-').map(Number);
+  return d+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1]+' '+y;
+};
+const addDays = (base,n) => new Date(base.getTime()+n*86400000).toISOString().slice(0,10);
+
+/* CURRENT SCOPE
+   ----------------------------------------------------------------------------------
+   Client-issued project contracts only. When a client re-issues one, the agent already
+   on that project has to accept the new version.
+
+   Out of scope here, and shown in the other prototype: the platform Independent
+   Contractor Agreement, and anything specific to a brand-new agent's onboarding.
+
+   Nothing in this scope blocks work or blocks applying. It is reminders in three places:
+   the Action required widget, the ongoing project's modal, and Settings → Legal.
+*/
+const S = {
+  platform:'signed', due:'p1', bankTax:true,
+  gatePick:null, gateList:false, gatePage:1, gateName:'', gateChk:false, dashProject:'j1',
+  /* Two project switchers exist in this variant — one in the page header, one inside the modal
+     that covers it — so they need a flag each. Sharing one opened both menus at once. */
+  dashSel:false, modalSel:false,
+  view:'home', tab:'available', sub:'joined', sort:'new', page:1,
+  docs:{sow:false,nda:false}, applied:[], openKind:'available',
+  docPage:1, docKey:'rv-sow', docVersion:null, signName:'', signChk:false,
+  viewKey:null, viewPage:1,
+  workProject:null, taskOpen:false,
+  guideCol:false, openProject:null
+};
+
+/* Legal documents do not expire, and there is no grace period. An unsigned contract is a
+   blocker, not a countdown: the platform contract locks the whole portal, a project contract
+   locks that project. So there are no deadlines, windows or badges anywhere. */
+const platformBlocked = () => PLATFORMDOCS.some(d=>!d.signed);
+
+/* Project contracts the agent has already accepted at some version. rv-sow and qa-dha are
+   the two the client has re-issued; the Due / State controls decide which are outstanding
+   and whether they are still inside their window. */
+/* Read-only in this release: signed once, never re-issued. They are viewable so the agent
+   can go back and read what they agreed to — the same reason the project ones are. */
+const PLATFORMDOCS = [
+  /* `edition` is model-only: it never reaches the screen. The platform agreement really does
+     vary by jurisdiction — the 2024 Global text and the Spain text are different documents, not
+     one improved into the other — but that is a fact for the data layer to carry. Agents see a
+     plain version number, which is what the API can be relied on to return. */
+  {id:'ica', project:null, title:'Independent Contractor Agreement', edition:'Spain',
+   version:2, effective:'2026-09-02', pages:6, signed:true, signedOn:'2026-09-03',
+   previous:[{v:1, edition:'2024 Global', effective:'2025-02-01', signed:'2025-02-03'}]},
+  /* This one does version in the ordinary way: the same document, revised as data law changes.
+     Both kinds of history exist, so the list in the Legal tab has to read correctly for each. */
+  {id:'dpa', project:null, title:'Data Processing Agreement', version:2,
+   effective:'2026-09-01', pages:4, signed:true, signedOn:'2026-09-02',
+   previous:[{v:1, effective:'2025-02-01', signed:'2025-02-03'}]},
+  /* Never re-issued: a one-time consent, kept so the Legal tab shows both kinds. */
+  {id:'bgc', project:null, title:'Background Check Consent & Criminal History Declaration',
+   version:1, effective:'2025-02-01', pages:3, signed:true, signedOn:'2025-02-03', previous:[]}
+];
+/* Project contracts do not version. A client issues distinct documents — NDA, Statement of
+   Work, Data Handling Addendum — and when it needs something more from an agent already on the
+   project it adds another one. So there is no V2 of anything here, no version history, and
+   nothing to re-sign: a contract is either signed, or newly added and waiting. */
+let PROJECTDOCS = [
+  {id:'im-ca',  project:'Image Moderation',  title:'Consulting Agreement', version:1,
+   effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
+  {id:'im-tou', project:'Image Moderation',  title:'Terms of Use', version:1,
+   effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
+  {id:'pz-nda', project:'Large Pizza Project', title:'Project NDA', version:1,
+   effective:'2024-11-18', pages:3, signed:true, signedOn:'2024-11-20', previous:[]},
+  {id:'pz-sow', project:'Large Pizza Project', title:'Statement of Work', version:1,
+   effective:'2024-11-18', pages:4, signed:true, signedOn:'2024-11-20', previous:[]},
+  {id:'rv-nda', project:'RV Rental Platform', title:'Project NDA', version:1,
+   effective:'2025-06-10', pages:3, signed:true, signedOn:'2025-06-12', previous:[]},
+  {id:'rv-sow', project:'RV Rental Platform', title:'Statement of Work', version:1,
+   effective:'2026-09-02', pages:4, signed:false, previous:[]},
+  /* RENEWAL. The one exception to "project contracts are signed once". Some countries cap how
+     long a single IC engagement can run on one signature — Australia at six months — so the
+     client sets a re-signing schedule on the contract and the SAME document comes round again.
+     No new upload, no new version, no new row: only the signature expires.
+     `renewMonths` and `country` exist purely so every renewal surface can say why. The clock
+     runs from `signedOn` — this agent's own signature — never from the upload date, so two
+     agents on the same contract fall due on different days. */
+  {id:'rv-ica', project:'RV Rental Platform', title:'Independent Contractor Agreement', version:1,
+   effective:'2026-03-08', pages:4, signed:true, signedOn:'2026-03-10', previous:[],
+   country:'Australia', renewMonths:6},
+  {id:'qa-dha', project:'Quality Assurance', title:'Data Handling Addendum', version:1,
+   effective:'2026-09-01', pages:3, signed:false, previous:[]}
+];
+
+/* A renewal reuses the outstanding-contract mechanism exactly — same widget row, same Legal
+   tile, same gate, same card. Nothing new is built. The only difference is what the agent is
+   told, so every surface asks this one question and swaps its copy.
+   Deliberately no countdown, no warning window, no overdue state: §12 stands, a contract is a
+   blocker rather than a timer, and a renewal is no different on the day it falls due. */
+const isResign = d => !!(d && d.resign && !d.signed);
+/* The sentence the whole feature turns on. Said once here so the gate, the card and the Legal
+   document page cannot drift apart. */
+function renewalWhy(d){
+  return `Independent contractor engagements in ${esc(d.country)} are limited to
+    ${d.renewMonths} months, so the same agreement has to be signed again.`;
+}
+
+/* Only one account-level prerequisite is left in scope, and it is pre-existing behaviour. */
+function requirements(){
+  const out = [];
+  if(!S.bankTax) out.push({
+    key:'bt', hard:true,
+    label:'Add your bank & tax information',
+    sub:'Needed before you can be paid',
+    scope:'all', cta:'Add bank & tax information',
+    note:'Finish your bank & tax info before applying.',
+    act:"toast('Would open Settings → Bank Details')"
+  });
+  return out;
+}
+
+/* Applying is the ONLY hard gate. It is one well-defined door, it is discretionary, and it
+   risks no existing income. Working is reached through many doors — the dashboard project
+   switcher, Handle Contacts Now, task claim, deep links — so gating it would be both leaky
+   and, for a contractor paid per task, a block on that day's earnings.
+   Everything outstanding for a project is surfaced as a reminder instead. */
+function outstandingFor(projectName){
+  const out = requirements().map(r => Object.assign({}, r, {late:false}));
+  PROJECTDOCS.filter(d=>d.project===projectName && !d.signed).forEach(d=>out.push({
+    key:d.id, scope:'project', blocks:true,
+    label:d.title,
+    /* No sub-line. A client cannot schedule when its contract takes effect, so there is no
+       effective date to show — and every other candidate (the project, the fact that it blocks
+       this project) is already said by the block this row sits inside. */
+    sub:'',
+    cta:'Review &amp; sign',
+    act:"openLegalDoc('"+d.id+"')"
+  }));
+  return out;
+}
+const canApply = () => !requirements().some(r=>r.hard);
+
+/* ============================================================
+   DATA
+   ============================================================ */
+const AVAIL = [
+  {id:'p1', name:'Short Project Name',                        type:'Data Labelling', stars:3.6, exp:'<3 years', skills:'Comprehension, Logic'},
+  {id:'p2', name:'Long Project Name Inbound Service Desk for Acme Co.', type:'Outbound', stars:4.1, exp:'<3 years', skills:'Voice, Typing'},
+  {id:'p3', name:'Sales Campaign for New Subscribers',        type:'Outbound', stars:3.6, exp:'<3 years', skills:'Voice'},
+  {id:'p4', name:'Inquiry Resolution for XYZ Banking Services',type:'Inbound',  stars:4.4, exp:'<3 years', skills:'Comprehension'},
+  {id:'p5', name:'Virtual Receptionist Services for Law Firm', type:'Inbound',  stars:3.9, exp:'<3 years', skills:'Voice, Logic'},
+  {id:'p6', name:'Order Processing for Online Retailer',       type:'Data Labelling', stars:4.0, exp:'<3 years', skills:'Logic'}
+];
+const JOINED = [
+  {id:'j9', name:'RV Rental Platform',                          type:'Inbound',  stars:4.2, exp:'<3 years', mode:'shifts'},
+  {id:'j7', name:'Quality Assurance',                           type:'Data Labelling', stars:3.6, exp:'<3 years', mode:'tasks'},
+  {id:'j1', name:'Short Project Name',                          type:'Data Labelling', stars:3.6, exp:'<3 years', mode:'tasks'},
+  {id:'j2', name:'Long Project Name Inbound Service Desk for Acme Co.', type:'Outbound', stars:3.6, exp:'<3 years'},
+  {id:'j3', name:'Sales Campaign for New Subscribers',          type:'Outbound', stars:3.6, exp:'<3 years'},
+  {id:'j4', name:'Inquiry Resolution for XYZ Banking Services', type:'Outbound', stars:3.6, exp:'<3 years'},
+  {id:'j5', name:'Virtual Receptionist Services for Law Firm',  type:'Outbound', stars:3.6, exp:'<3 years'},
+  {id:'j6', name:'Order Processing for Online Retailer',        type:'Outbound', stars:3.6, exp:'<3 years'},
+  {id:'j8', name:'Complaint Resolution & Service Recovery',     type:'Outbound', stars:3.6, exp:'<3 years'},
+  {id:'j10',name:'Feedback Collection for Retail Brand',        type:'Inbound',  stars:3.9, exp:'<3 years'}
+];
+const PENDING = [
+  {id:'q1', name:'Technical Support Tier 1',                    type:'Inbound',  stars:4.0, exp:'<3 years'},
+  {id:'q2', name:'Appointment Setting for Dental Group',         type:'Outbound', stars:3.7, exp:'<3 years'}
+];
+const DOCS = {
+  sow:{title:'Statement of Work', scope:'project', project:'RV Rental Platform',
+       body:`<h5>Statement of Work — RV Rental Platform</h5>
+       <p>This Statement of Work describes the services to be delivered under the RV Rental Platform project and supplements any agreement already in force between the parties.</p>
+       <b class="cl">Scope</b><p>Inbound customer support for rental bookings, cancellations and damage claims, delivered during the scheduled shifts the Contractor books through the platform.</p>
+       <b class="cl">Service levels</b><p>Contractor will maintain an average handling quality score of 3.5 or above across any rolling thirty-day period.</p>
+       <b class="cl">Client-specific tooling</b><p>Contractor agrees to complete the client's booking-system training module before taking live contacts.</p>`},
+  nda:{title:'Project NDA', scope:'project', project:'RV Rental Platform',
+       body:`<h5>Project Non-Disclosure Agreement</h5>
+       <p>This Agreement applies to confidential information disclosed in connection with the RV Rental Platform project only.</p>
+       <b class="cl">1. Confidential information</b><p>Includes customer records, booking data, pricing, and any material marked confidential or that a reasonable person would understand to be confidential.</p>
+       <b class="cl">2. Obligations</b><p>Contractor shall use confidential information solely to perform the services and shall not disclose it to any third party.</p>
+       <b class="cl">3. Duration</b><p>Obligations survive for three (3) years following the end of the Contractor's participation in the project.</p>`}
+};
+
+/* ============================================================
+   HOME
+   ============================================================ */
+function projectDocItems(){
+  const due = PROJECTDOCS.filter(d=>!d.signed);
+  if(!due.length) return [];
+  /* The word has to say "you have signed this before" without ever being "re-sign".
+     Hyphenated, it collapses into "resign" — quit — for anyone scanning quickly or reading
+     in a second language, and it turns up on a row that is already telling the agent they
+     are blocked from a project. "Sign … again" carries the same meaning, cannot be misread,
+     and is simpler English besides. It is never split across a line break here because the
+     row truncates rather than wraps. */
+  if(due.length===1) return [{done:false,
+    lbl: isResign(due[0])
+      ? 'Sign '+due[0].title+' again — '+due[0].project
+      : 'Sign '+due[0].title+' — '+due[0].project,
+    act:"openLegalDoc('"+due[0].id+"')"}];
+  /* Name the project whenever they are all in one — a count is only worth using when there
+     is nothing more specific to say. */
+  const projects=[...new Set(due.map(d=>d.project))];
+  /* Only say "again" when every outstanding contract is a renewal. Mixed goes back to the
+     plain wording, because "again" would be wrong for half the list. */
+  const allAgain = due.every(isResign);
+  if(projects.length===1) return [{done:false,
+    lbl:'Sign '+due.length+' project contracts'+(allAgain?' again':'')+' in '+projects[0],
+    /* The widget is a reminder, so it lands where contracts live rather than dropping the
+       agent into a project they may not have been heading for. */
+    act:"go('legal')"}];
+  return [{done:false,
+    lbl:'Sign '+due.length+' project contracts'+(allAgain?' again':'')
+        +' across '+projects.length+' projects',
+    act:"go('legal')"}];
+}
+/* Existing agent only: the widget carries whatever is outstanding. Bank & tax leads, since
+   it gates getting paid; the client contracts follow. Neither has a deadline of its own, so
+   only the contract rows carry a badge. */
+function guideItems(){
+  const items = [];
+  if(!S.bankTax){
+    items.push({done:false, lbl:'Add bank details', act:"toast('Would open Settings → Bank Details')"});
+    items.push({done:false, lbl:'Add tax info',     act:"toast('Would open Settings → Tax Information')"});
+  }
+  return items.concat(projectDocItems());
+}
+function guideHTML(){
+  const items = guideItems();
+  const outstanding = items.filter(i=>!i.done).length;
+  /* Nothing outstanding means the card is gone. A checklist that lingers at 100% becomes
+     wallpaper, and the agent stops seeing it by the time something urgent lands in it. */
+  /* Nothing outstanding means no widget. There is no onboarding checklist behind this in
+     current scope, so there is nothing to congratulate the agent for finishing. */
+  if(!outstanding) return '';
+  const done = items.filter(i=>i.done).length;
+  /* Reminder-only mode: no progress to report, and "Setup guide" would be the wrong word. */
+  const reminderOnly = done===0;
+  return `<div class="guide ${S.guideCol?'col':''}">
+    <div class="ghead"><h2>${reminderOnly?'Action required':'Setup guide'}</h2>
+      <span class="gcount">${outstanding} left</span>
+      <button class="gtog" onclick="S.guideCol=!S.guideCol;render()" aria-label="Collapse">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg></button></div>
+    ${reminderOnly?'':`<div class="gbar"><i style="width:${Math.round(done/items.length*100)}%"></i></div>`}
+    <div class="glist">
+      ${items.map(i=>{
+        const tag = i.act ? 'button' : 'div';
+        const cls = ['gitem', i.done&&'done', i.act&&'act'].filter(Boolean).join(' ');
+        return `<${tag} class="${cls}"${i.act?` type="button" onclick="${i.act}"`:''}>
+          <span class="dot">${i.done?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':''}</span>
+          <span class="gtxt"><span class="lbl">${i.lbl}</span>
+            ${i.due?`<span class="due ${i.late?'late':''}">${i.due}</span>`:''}</span>
+        </${tag}>`;
+      }).join('')}
+    </div>
+    ${reminderOnly?'':`<div class="gfoot">Unlock all projects by completing your profile &amp; the Gig Requirements</div>`}
+  </div>`;
+}
+
+function starBar(v){
+  const full=Math.round(v);
+  return `<span class="stars">${'\u2605'.repeat(full)}<span class="dim">${'\u2605'.repeat(5-full)}</span></span>`;
+}
+function projCard(p, kind){
+  return `<button class="proj" onclick="openProject('${p.id}','${kind}')">
+    <div class="projtop">
+      <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5H9a4 4 0 0 0 0 8h6a4 4 0 0 1 0 8h-5"/></svg></span>
+      <b>${esc(p.name)}</b><span class="car">\u203A</span></div>
+    ${PROJECTDOCS.some(x=>x.project===p.name && !x.signed)
+      ? `<div class="projlock">${DOCMARK}Signature required</div>` : ''}
+    <div class="prow"><span class="k">Type</span><span class="v">${p.type}</span></div>
+    <div class="prow"><span class="k">Avg. Star Rating</span><span class="v">${p.stars} ${starBar(p.stars)}</span></div>
+    <div class="prow"><span class="k">Exp. Requirement</span><span class="v">${p.exp}</span></div>
+    <div class="prow"><span class="k">Hiring From</span><span class="v flags">\uD83C\uDDE8\uD83C\uDDE6 Canada &nbsp;\uD83C\uDDE8\uD83C\uDDF4 Colombia +5</span></div>
+  </button>`;
+}
+
+const PER_PAGE = 9;
+function pagerHTML(pages){
+  if(pages<2) return '';
+  return `<div class="pager">
+    <button class="pgb" ${S.page===1?'disabled':''} onclick="S.page=${S.page-1};render()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
+    ${Array.from({length:pages},(_,i)=>i+1).map(n=>
+      `<button class="pgn ${n===S.page?'on':''}" onclick="S.page=${n};render()">${n}</button>`).join('')}
+    <button class="pgb" ${S.page===pages?'disabled':''} onclick="S.page=${S.page+1};render()">Next
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
+  </div>`;
+}
+function pendingList(){
+  return PENDING.concat(S.applied.map(id=>AVAIL.find(p=>p.id===id)).filter(Boolean));
+}
+function projectsHTML(){
+  const ongoing = S.tab==='joined';
+  const joinedN = JOINED.length, pendN = pendingList().length;
+  let list, title, sub;
+  if(ongoing){
+    list  = S.sub==='pending' ? pendingList() : JOINED;
+    title = 'Ongoing Projects'; sub = "Projects you're working on or applying to";
+  } else {
+    list  = AVAIL.filter(p=>!S.applied.includes(p.id));
+    title = 'Available Projects'; sub = 'Apply for your next project';
+  }
+  if(S.sort==='old') list = list.slice().reverse();
+  const pages = Math.max(1,Math.ceil(list.length/PER_PAGE));
+  if(S.page>pages) S.page=pages;
+  const slice = list.slice((S.page-1)*PER_PAGE, S.page*PER_PAGE);
+
+  return `<div class="psec">
+    <div class="psechead"><h2>Projects</h2><div class="sp"></div>
+      <div class="segs">
+        <button class="seg ${ongoing?'on':''}" onclick="S.tab='joined';S.page=1;render()">Ongoing Projects</button>
+        <button class="seg ${ongoing?'':'on'}" onclick="S.tab='available';S.page=1;render()">Available Projects</button>
+      </div></div>
+    <div class="pcard">
+      <div class="pcardhead">
+        <b>${title}</b><span class="ct">(${ongoing?joinedN+pendN:list.length})</span>
+        <span class="dash">&ndash;&nbsp; ${sub}</span>
+        <div class="sp"></div>
+        <div class="sortwrap"><label for="srt">Sort:</label>
+          <select id="srt" onchange="S.sort=this.value;S.page=1;render()">
+            <option value="new" ${S.sort==='new'?'selected':''}>Newest first</option>
+            <option value="old" ${S.sort==='old'?'selected':''}>Oldest first</option>
+          </select></div>
+      </div>
+      ${ongoing?`<div class="subtabs">
+        <button class="subtab ${S.sub==='joined'?'on':''}" onclick="S.sub='joined';S.page=1;render()">Joined Projects (${joinedN})</button>
+        <button class="subtab ${S.sub==='pending'?'on':''}" onclick="S.sub='pending';S.page=1;render()">Pending Projects (${pendN})</button>
+      </div>`:`<div style="height:22px"></div>`}
+
+      ${slice.length?`<div class="grid">${slice.map(p=>projCard(p,ongoing?(S.sub==='pending'?'pending':'joined'):'available')).join('')}</div>${pagerHTML(pages)}`
+                    :`<div class="pempty">Nothing here yet.</div>`}
+    </div>
+  </div>`;
+}
+
+function homeHTML(){
+  return `<h1 class="hi">Welcome back, Olivia!</h1>
+  <div class="toprow">
+    <div class="tier">
+      <span class="badge">\uD83D\uDE80 Tier 1 Preferred Agent</span>
+      <p>Way to go! You've made it to <b>the top tier</b>! You're one of the select few agents who get
+         first dibs on the hottest new shifts for <b>Project A</b>.</p>
+    </div>
+    <div class="hero"><h3>What is Star Rating?</h3>
+      <p>How Star Rating works and ways to improve performance.</p></div>
+  </div>
+  ${projectsHTML()}
+  ${guideHTML()}`;
+}
+
+/* ============================================================
+   SETTINGS → LEGAL
+   ============================================================ */
+/* The Legal section is "incomplete" whenever something in it still needs a signature —
+   that is what the nav-item hint reports. */
+const legalIncomplete = () => PROJECTDOCS.some(d=>!d.signed);
+
+function setShell(inner){
+  const hint = legalIncomplete()
+    ? `<span class="ihint" tabindex="0">!<span class="tip">Incomplete section</span></span>` : '';
+  return `<div class="sheet">
+    <h1>Settings</h1>
+    <div class="setgrid">
+      <nav class="setnav">
+        ${['Personal Information','Skills & Preferences','Work Experience','Job Matching Profile','Bank Details','Tax Information','Referral Payments','Gig Requirements']
+          .map(n=>`<button onclick="toast('Not part of this prototype')">${n}</button>`).join('')}
+        <button class="on" onclick="backToLegal()">Legal${hint}</button>
+        <button onclick="toast('Not part of this prototype')">Privacy Settings</button>
+        <button onclick="toast('Not part of this prototype')">Notifications</button>
+      </nav>
+      <div class="setbody">${inner}</div>
+    </div>
+  </div>`;
+}
+
+const CHEV = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>`;
+const DOCMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>`;
+const TICKMARK = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const PEN = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`;
+const signedTag = date => `<span class="signedon">${PEN}${fmt(date)}</span>`;
+/* One unsigned state in the Legal tab. How urgent it is belongs in the reminder surfaces,
+   not in what is essentially the agent's record of what they have signed. */
+/* One label for both, deliberately. A renewal and a newly added contract need the same thing
+   from the agent here — a signature — and the tile's job in this tab is to say which documents
+   are outstanding, not to explain why. The why is one click away, on the document itself, where
+   there is room to say it properly. */
+const needsTag  = () => `<span class="tag need">Needs signature</span>`;
+
+function legalHTML(){
+  const projects = [...new Set(PROJECTDOCS.map(d=>d.project))];
+  return setShell(`
+        <h2>Legal</h2>
+
+        <div class="docgroup">
+          <h3>Platform Contracts</h3>
+          ${/* Alphabetical, sorted at render rather than baked into the data, so a document added
+               later lands in the right place without anyone reordering the array. Sorting here and
+               not in PLATFORMDOCS itself also leaves the gate's own order alone. */''}
+          ${PLATFORMDOCS.slice().sort((a,b)=>a.title.localeCompare(b.title)).map((d,i)=>`
+            <button class="docrow clickable" ${i?'style="margin-top:20px"':''} onclick="${d.signed?'openSignedDoc':'openLegalDoc'}('${d.id}')">
+              <div class="nm"><b>${esc(d.title)}</b></div>
+              ${signedTag(d.signedOn)}
+            </button>
+            ${versionRows(d)}`).join('')}
+        </div>
+
+        <div class="docgroup">
+          <h3>Project Contracts</h3>
+          ${projects.map(proj=>`<div class="projgrp">
+            <div class="projgrp-nm">${esc(proj)}</div>
+            ${PROJECTDOCS.filter(d=>d.project===proj).map(d=>`
+              <button class="docrow clickable ${d.signed?'':'act'}" onclick="${d.signed?'openSignedDoc':'openLegalDoc'}('${d.id}')">
+                <div class="nm"><b>${esc(d.title)}</b></div>
+                ${d.signed ? signedTag(d.signedOn||addDays(TODAY,0)) : needsTag()}
+              </button>
+              ${versionRows(d)}`).join('')}
+          </div>`).join('')}
+        </div>`);
+}
+
+/* Nothing. Every upload is its own row in its container — a new version and a wholly different
+   document are the same kind of thing to the system — so there is no parent/child relationship
+   for the Legal tab to draw. A flat list of contracts, one row each. */
+function versionRows(d){ return ''; }
+
+/* ============================================================
+   DOCUMENT VIEW — sign, and later review, in the place the doc lives
+   ============================================================ */
+const DOC_PAGES = 13;
+/* How a document identifies itself. A project contract has nothing to add — there is only ever
+   one of each, so a number would be noise. A platform contract gives its version number and
+   nothing more: the jurisdiction it belongs to is a fact about the model, not something an
+   agent-facing badge has to carry, and a plain number is what the API can be relied on to
+   return. */
+function docStamp(c, info){
+  if(!c.platform) return '';
+  return 'V'+info.v;
+}
+/* Project documents are short. Same frame, same signing block, less paper. */
+function projectPaper(n, info, c){
+  const stamp = docStamp(c, info);
+  const revised = info.current && c.previous && c.previous.length;
+  const head = `<div class="aologo"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+      <b>Agents<br>Only</b></div>
+    <h5>${esc(c.title)}</h5>
+    <p style="text-align:center;color:#7c8a9c;margin-bottom:26px">${c.platform?'AgentsOnly':esc(c.project)}${stamp?' · '+stamp:''} · Effective ${fmt(info.effective)}</p>`;
+  if(n===1 && c.platform) return head + `
+    <p>This contract is between AgentsOnly and the Contractor and governs every project the
+      Contractor works on through the Platform.</p>
+    <p class="cl">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCOPE</p>
+    <p class="ind">Contractor may access personal data belonging to Company clients while performing
+      services. This contract sets out how that data must be handled.</p>
+    <p class="cl">2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;PROCESSING</p>
+    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will process personal data only on documented
+      instructions from the Company, and only for the project it was provided for.</p>
+    <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will not transfer personal data outside the tools
+      the Company provides.${revised?' <b>New in the '+stamp+':</b> extended to cover AI assistants and any third-party tooling.':''}</p>
+    <p class="cl">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;RETENTION</p>
+    <p class="ind">Contractor will retain personal data no longer than the task requires, and will
+      delete or return it on request.</p>
+    <p class="cl">4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INCIDENTS</p>
+    <p class="ind">Contractor will report any suspected breach to the Company without undue delay and
+      in any event within twenty-four (24) hours of becoming aware of it.</p>`;
+  if(n===1) return head + `
+    <p>This contract is issued by the client for the <b>${esc(c.project)}</b> project and applies only to work
+      performed on that project. It supplements, and does not replace, the Independent Contractor Agreement.</p>
+    <p class="cl">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCOPE</p>
+    <p class="ind">(a)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will perform the services described in the project brief,
+      using the tools and workflows the client provides through the Platform.</p>
+    <p class="ind">(b)&nbsp;&nbsp;&nbsp;&nbsp;Contractor will complete any client-specific training module before
+      handling live work.</p>
+    <p class="cl">2.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;QUALITY</p>
+    <p class="ind">Contractor will maintain an average quality score of 3.5 or above across any
+      rolling thirty-day period.</p>
+    <p class="cl">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONFIDENTIALITY</p>
+    <p class="ind">Contractor will not disclose client data, materials or pricing encountered on this project, and
+      will return or destroy such materials on request.</p>`;
+  return head + `
+    <p class="cl">${n+2}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FURTHER TERMS</p>
+    <p class="ind">Placeholder text standing in for the remaining clauses of this document.</p>
+    <p style="text-align:center;color:#9aa8b8;margin-top:40px">— ${stamp?stamp+' · ':''}Page ${n} of ${c.pages} —</p>`;
+}
+/* Which version's terms are on screen. Previous versions really do differ — that is the
+   whole reason for keeping them. */
+/* Which document the page is showing. One component serves the platform agreement and
+   every project document, because they behave identically once they are versioned. */
+function docCtx(key){
+  const K = key || S.docKey;
+  const d = PLATFORMDOCS.concat(PROJECTDOCS).find(x=>x.id===K) || PROJECTDOCS[0];
+  return {key:d.id, title:d.title, project:d.project, platform:!d.project,
+    version:d.version, effective:d.effective, previous:d.previous, pages:d.pages,
+    /* `lastSigned` survives an expiry — the signature that ran out is what the renewal notice
+       is about, so it cannot be cleared when the document goes back to unsigned. */
+    resign:isResign(d), country:d.country, renewMonths:d.renewMonths, lastSigned:d.signedOn,
+    signedOn: d.signed ? (d.signedOn || addDays(TODAY,0)) : null};
+}
+function verInfo(v){
+  const c = docCtx();
+  if(!v || v===c.version)
+    return {v:c.version, effective:c.effective, signed:c.signedOn, current:true};
+  const p = c.previous.find(x=>x.v===v) || c.previous[0];
+  return {v:p.v, effective:p.effective, signed:p.signed, current:false};
+}
+function paperPage(n, ver){ return projectPaper(n, verInfo(ver), docCtx()); }
+function docPager(){
+  const p=S.docPage, last=docCtx().pages;
+  let nums=[];
+  if(last<=7) nums=Array.from({length:last},(_,i)=>i+1);
+  else if(p<=5) nums=[1,2,3,4,5,'…',last];
+  else if(p>=last-3) nums=[1,'…',last-4,last-3,last-2,last-1,last];
+  else nums=[1,'…',p-1,p,p+1,'…',last];
+  return `<div class="pager">
+    <button class="pgb" ${p===1?'disabled':''} onclick="S.docPage=${p-1};render()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
+    ${nums.map(n=>n==='…'?`<span class="pgn" style="cursor:default">…</span>`
+      :`<button class="pgn ${n===p?'on':''}" onclick="S.docPage=${n};render()">${n}</button>`).join('')}
+    <button class="pgb" ${p===last?'disabled':''} onclick="S.docPage=${p+1};render()">Next
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
+  </div>`;
+}
+function docHTML(){
+  const c       = docCtx();
+  const info    = verInfo(S.docVersion);
+  const stamp   = docStamp(c, info);
+  const archive = !info.current;                  // a superseded version, kept for the record
+  const done    = archive ? true : !!c.signedOn;  // review mode on the live version
+  const name    = done ? 'Olivia O.J Rhye' : S.signName;
+  const ready   = !done && S.signName.trim() && S.signChk;
+  return setShell(`
+    <button class="backlink" onclick="backToLegal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>
+      Legal</button>
+    <div class="docview">
+      <h2>${esc(c.title)}${stamp?`<span class="verchip ${archive?'':'cur'}">${stamp} · ${archive?'Replaced':'Current'}</span>`:''}</h2>
+      <p class="docscope">${c.platform
+        ? 'Platform contract · Applies to every project you work on'
+        : esc(c.project)+' · Required for this project only'}</p>
+      ${/* The renewal notice sits exactly where the "replaced version" notice sits, and does the
+             same job: it explains, before the paper, why the document on screen is not simply the
+             one the agent expected. Same component, different sentence. */''}
+      ${c.resign?`<div class="notice plain" style="margin-bottom:20px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span><b>You signed this contract on ${fmt(c.lastSigned)}.</b> ${renewalWhy(c)}
+          Nothing in the document has changed.</span></div>`:''}
+      ${archive?`<div class="notice plain" style="margin-bottom:20px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span><b>These are the terms you agreed to on ${fmt(info.signed)}.</b> They have since been replaced,
+          so they no longer govern your work.
+          &nbsp;<button class="prev" onclick="openLegalDoc('${c.key}')">View the current ${docStamp(c, verInfo(null))}</button></span></div>`:''}
+      <div class="paperframe"><div class="paperpg">${paperPage(S.docPage, info.v)}</div></div>
+      ${docPager()}
+      <div class="sigsec">
+        <h3>Contractor Signature</h3>
+        <div class="fld"><label for="sfn">Full name</label>
+          <input type="text" id="sfn" autocomplete="off" ${done?'disabled':''} value="${esc(name)}"
+                 oninput="S.signName=this.value;syncSign()"></div>
+        <div class="chkrow">
+          <input type="checkbox" id="sck" ${done||S.signChk?'checked':''} ${done?'disabled':''}
+                 onchange="S.signChk=this.checked;syncSign()">
+          <label for="sck">I have read and accepted the ${esc(c.title)}.</label>
+        </div>
+        <div class="sigdiv"></div>
+        <div class="sigfoot">
+          ${archive
+            ? `<span class="signedline">Signed ${fmt(info.signed)} · This version can no longer be changed</span>`
+            : done
+              /* Once signed there is nothing left to submit, so the button becomes the record. */
+              ? `<span class="signedline">Signed ${fmt(info.signed)}</span>`
+              : `<button class="btn pri sq" id="sbtn" ${ready?'':'disabled'} onclick="submitSign()">Submit</button>`}
+        </div>
+      </div>
+    </div>`);
+}
+/* Enable/disable in place rather than re-rendering, so the field doesn't lose focus mid-typing. */
+function syncSign(){
+  const b=document.getElementById('sbtn');
+  if(b) b.disabled = !(S.signName.trim() && S.signChk);
+}
+function openLegalDoc(key, v){
+  S.view='doc'; S.docKey = key || 'rv-sow'; S.docPage=1; S.docVersion = v || null;
+  S.signName=''; S.signChk=false;
+  closeAcct(); closeScrim(); render();
+}
+function backToLegal(){ S.view='legal'; S.docKey='rv-sow'; S.docVersion=null; render(); }
+
+/* A signed contract is a record, not a task. Opening one from Settings → Legal shows it read-only
+   with a download, rather than the signing page — there is nothing left to sign there, and a
+   signature block on a contract already signed only raises the question of whether something is
+   still outstanding. An unsigned tile still goes to the signing page. */
+function openSignedDoc(key){ S.viewKey=key; S.viewPage=1; drawSignedDoc(); }
+function drawSignedDoc(){
+  const c = docCtx(S.viewKey);
+  const info = {v:c.version, effective:c.effective, signed:c.signedOn, current:true};
+  const last = c.pages, p = S.viewPage;
+  return scrim(`<div class="viewer">
+    <div class="vhead">
+      <button class="x" style="position:static" onclick="closeScrim()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
+      <span class="vt">${esc(c.title)}</span>
+      <button class="btn pri sm" onclick="downloadDoc()">Download</button>
+    </div>
+    <div class="vpaper">
+      <div class="vdoc"><div class="paperpg">${projectPaper(p, info, c)}</div></div>
+      <div class="pager vpager">
+        <button class="pgb" ${p===1?'disabled':''} onclick="S.viewPage=${p-1};drawSignedDoc()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
+        ${Array.from({length:last},(_,i)=>i+1).map(n=>
+          `<button class="pgn ${n===p?'on':''}" onclick="S.viewPage=${n};drawSignedDoc()">${n}</button>`).join('')}
+        <button class="pgb" ${p===last?'disabled':''} onclick="S.viewPage=${p+1};drawSignedDoc()">Next
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </div>
+  </div>`);
+}
+/* Name what landed on their machine. "Downloaded" alone leaves the agent checking. */
+function downloadDoc(){
+  const c = docCtx(S.viewKey);
+  toast('Successfully downloaded '+(c.project ? esc(c.project)+"'s "+esc(c.title) : esc(c.title))+'.');
+}
+
+function submitSign(){
+  if(!(S.signName.trim() && S.signChk)) return;
+  const c=docCtx();
+  const wasResign=c.resign;
+  const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0);
+  render();
+  /* A renewal is worth confirming as a renewal: the agent knows they signed this before, so
+     "signed" alone leaves them wondering whether the right thing happened. */
+  toast(wasResign
+    ? c.title+' signed again. Next due in '+c.renewMonths+' months.'
+    : c.title+' signed.');
+}
+
+/* ============================================================
+   PROJECT DETAIL MODAL  — where the gate lives
+   ============================================================ */
+function openProject(id,kind){ S.openProject=id; S.openKind=kind||'available'; drawProject(); }
+function projById(){
+  const id=S.openProject;
+  if(S.openKind==='joined')  return JOINED.find(p=>p.id===id);
+  if(S.openKind==='pending') return pendingList().find(p=>p.id===id);
+  return AVAIL.find(p=>p.id===id);
+}
+const SKILLS = ['Comprehension','LLM Response','Logic','Typing','Voice'];
+const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+function modalBody(p, insert){
+  return `<div class="dtable">
+    <div class="r"><span class="k">Type</span><span class="v">${p.type}
+      <span class="typeic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span></span></div>
+    <div class="r"><span class="k">Avg. Star Rating</span><span class="v">${p.stars} ${starBar(p.stars)}</span></div>
+    <div class="r"><span class="k">Exp. Requirement</span><span class="v">${p.exp}</span></div>
+    <div class="r"><span class="k">Skills Test<span class="tcount">2</span></span><span class="v">${p.skills||'Comprehension, Logic'}</span></div>
+    <div class="r"><span class="k">Hiring From</span><span class="v flagrow">
+      <span>\uD83C\uDDE8\uD83C\uDDE6 Canada</span><span>\uD83C\uDDE8\uD83C\uDDF4 Colombia</span>
+      <span>\uD83C\uDDEE\uD83C\uDDF3 India</span><span>\uD83C\uDDF5\uD83C\uDDED Philippines</span></span></div>
+  </div>
+  ${insert||''}
+  <div class="skillsec"><h4>Required Skills Test</h4>
+    <div class="skillgrid">${SKILLS.map(n=>`<div class="skill"><b>${n}</b>
+      <span class="st">Done ${TICK}</span></div>`).join('')}</div>
+  </div>
+  <div class="pdesc">
+    <h4>Project Description</h4>
+    <p>As a Feedback Collection agent, you'll help us shape our products and services to better meet our
+       customers' needs. We offer a supportive and collaborative work environment, where your efforts are
+       highly valued.</p>
+    <p>To excel in this role, you'll need:</p>
+    <ul>
+      <li>Strong communication and interpersonal skills to engage with customers effectively.</li>
+      <li>Excellent organization and attention to detail in managing feedback data.</li>
+      <li>A commitment to maintaining the highest standards of data privacy and confidentiality.</li>
+    </ul>
+  </div>`;
+}
+const closeX = `<button class="x" onclick="closeScrim()" aria-label="Close">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>`;
+
+function drawProject(){
+  const p = projById();
+  if(!p) return closeScrim();
+
+  /* Joined — read-only. Anything outstanding is shown here as a reminder, never as a gate:
+     Go to Project stays live regardless. */
+  if(S.openKind==='joined'){
+    const due = outstandingFor(p.name);
+    const blockers = due.filter(r=>r.blocks);
+    const blocked  = blockers.length>0;
+    const nblock   = blockers.length;
+    return scrim(`<div class="modal" data-m="project">
+      <div class="mhead"><h3>${esc(p.name)}</h3>${closeX}</div>
+      ${/* One wording for all three cases — new contracts, expired signatures, or a mix.
+             It works because the heading and sub-line describe the SITUATION (you are held up
+             on this project, and only this project) rather than why each contract is
+             outstanding, which is the only thing that actually differs between the cases.
+             "Review & sign" is true of an expired signature too: the agent does review it and
+             sign it, and it never claims the contract is new. */''}
+      <div class="mbody">${modalBody(p, due.length?`<div class="reqs ${blocked?'':'softonly'}">
+          <h4>${blocked?'Action needed':'Worth doing soon'}</h4>
+          <div class="sub">${blocked
+            ? 'Please review and sign the newly added legal document(s) below to continue to the project.'
+            : 'None of this affects your work on this project — you can carry on as normal.'}</div>
+          ${due.map(r=>`<div class="req">
+            <span class="ri">${DOCMARK}</span>
+            <span class="rt"><b>${r.label}</b>
+              ${/* Only the account prerequisite is badged. A project contract sitting inside a
+                    project's own modal does not need telling that it belongs to that project —
+                    the heading, the sub-line and the surrounding context all say so already.
+                    Bank & tax is the exception because it is the one row whose reach is wider
+                    than the modal it appears in. "for your account" rather than "for all
+                    projects", so it cannot be misread as a platform contract — those never reach
+                    this modal, because the portal gate catches them on entry. */''}
+              ${r.scope==='project'?'':`<span class="chiprow">
+                <span class="chip all">Required for your account</span>
+              </span>`}
+              ${r.sub?`<span class="reqsub">${r.sub}</span>`:''}</span>
+            <button class="btn ghost sm" onclick="${r.act}">${r.cta}</button>
+          </div>`).join('')}
+        </div>`:'')}</div>
+      <div class="mfoot">
+        <div class="sp"></div>
+        ${/* Signing happens in Settings → Legal, the same place the row buttons above go and the
+             same place the reminder widget goes. The dashboard gate is for an agent who was
+             actually stopped at that project's door; opening a card to look at a project is not
+             that, so it should not relocate them into the project.
+             One outstanding contract opens that contract. Two or more open the Legal tab, so the
+             agent can see both rather than meeting them one at a time. */''}
+        ${blocked
+          ? `<button class="btn pri" onclick="${nblock>1?"go('legal')":"openLegalDoc('"+blockers[0].key+"')"}">Review &amp; sign to continue</button>`
+          : `<button class="btn pri" onclick="openWork('${p.id}')">Go to Project</button>`}</div>
+    </div>`);
+  }
+
+  /* Pending — nothing for the agent to do but wait, so there is no action at all. */
+  if(S.openKind==='pending') return scrim(`<div class="modal" data-m="project">
+    <div class="mhead"><div class="titlerow"><h3>${esc(p.name)}</h3>
+      <span class="statepill"><i></i>Pending Approval</span></div>${closeX}</div>
+    <div class="mbody" style="padding-bottom:28px">${modalBody(p)}</div>
+  </div>`);
+
+  /* Available — the gate lives here. */
+  const reqs = requirements();
+  const hard = reqs.filter(r=>r.hard);
+  const soft = reqs.filter(r=>!r.hard);
+  /* One layout at any number of blockers: every row states a requirement and carries its own
+     action, and the footer always shows what the modal is for. The button's label stops
+     changing meaning — only its state does. */
+  scrim(`<div class="modal" data-m="project">
+    <div class="mhead"><h3>${esc(p.name)}</h3>${closeX}</div>
+    <div class="mbody">
+      ${modalBody(p, reqs.length?`<div class="reqs ${hard.length?'':'softonly'}">
+        <h4>${hard.length?'Before you can apply':'Worth doing soon'}</h4>
+        <div class="sub">These apply to your whole account, not just this project.</div>
+        ${reqs.map(r=>`<div class="req ${r.hard?'hard':''}">
+          <span class="ri">${DOCMARK}</span>
+          <span class="rt"><b>${r.label}</b>
+            ${r.badge?`<span class="chiprow">
+              <span class="due ${r.late||r.hard?'late':''}">${r.badge}</span></span>`:''}
+            ${r.sub?`<span class="reqsub">${r.sub}</span>`:''}</span>
+          <button class="btn ghost sm" onclick="${r.act}">${r.cta}</button>
+        </div>`).join('')}
+      </div>`:'')}
+    </div>
+    <div class="mfoot">
+      ${hard.length
+        ? `<div class="footnote late">*${hard.length===1?hard[0].note:'Finish the items above before applying.'}</div>`
+        : `<div class="sp"></div>`}
+      <button class="btn pri" ${hard.length?'disabled':''} onclick="applyNow()">Apply</button>
+    </div>
+  </div>`);
+}
+
+/* ============================================================
+   DOC VIEWER + SIGN DIALOG  (one component, every document)
+   ============================================================ */
+let AFTER_SIGN = null;
+function openDoc(key, after){
+  AFTER_SIGN = after || null;
+  const d = DOCS[key];
+  scrim(`<div class="viewer">
+    <div class="vhead">
+      <button class="x" style="position:static" onclick="backFromDoc()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
+      <span class="vt">${esc(d.title)}</span>
+      <button class="btn pri sm" onclick="signDialog('${key}')">Sign &amp; Continue</button>
+    </div>
+    <div class="vpaper"><div class="paper">${d.body}</div></div>
+  </div>`);
+}
+function backFromDoc(){
+  if(AFTER_SIGN==='docs') return drawProjectDocs();
+  if(S.openProject) return drawProject();
+  closeScrim();
+}
+function signDialog(key){
+  const d = DOCS[key];
+  scrim(`<div class="signbox">
+    <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.2 11 14.7 15.8 9.6"/></svg></div>
+    <h4>Sign ${esc(d.title)}</h4>
+    <p>Type your full name to sign this contract.</p>
+    <label for="fn">Full name</label>
+    <input type="text" id="fn" autocomplete="off" oninput="syncConfirm()">
+    <div class="chkrow">
+      <input type="checkbox" id="sgck" onchange="syncConfirm()">
+      <label for="sgck">I have read and accepted the ${esc(d.title)}.</label>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="openDoc('${key}',AFTER_SIGN)">Cancel</button>
+      <button class="btn pri" id="cf" disabled onclick="doSign('${key}')">Confirm</button>
+    </div>
+  </div>`);
+  setTimeout(()=>{const f=document.getElementById('fn'); if(f) f.focus();},0);
+}
+/* Same gate as the Legal page: a typed name AND an explicit acceptance. */
+function syncConfirm(){
+  const n=document.getElementById('fn'), c=document.getElementById('sgck'), b=document.getElementById('cf');
+  if(b) b.disabled = !(n && n.value.trim() && c && c.checked);
+}
+function doSign(key){
+  const c=document.getElementById('sgck');
+  if(c && !c.checked) return;
+  S.docs[key] = true;
+  render();
+  toast(DOCS[key].title+' signed.');
+  drawProjectDocs();
+}
+
+/* ============================================================
+   PROJECT DASHBOARD — the other door into a project
+   ============================================================ */
+const projLocked = name => PROJECTDOCS.some(d=>d.project===name && !d.signed);
+function pickDash(id){
+  const p = JOINED.find(x=>x.id===id);
+  S.dashSel=false; S.modalSel=false; S.dashProject=id;
+  S.gatePick=null; S.gateList=false; S.gateName=''; S.gateChk=false; S.gatePage=1;
+  render();
+}
+/* The rule for what a project contract blocks is the project selector at the top of the page.
+   A page that carries the selector is scoped to one project, so an unsigned contract for that
+   project replaces its body with the gate. A page without it — Schedule, Earnings, Referrals,
+   account settings — belongs to the agent rather than to the project, and is never blocked.
+   Earnings most of all: that money is already earned.
+   Written as a rule rather than as a list of three pages, so that a project-scoped page added
+   later inherits the block instead of quietly missing it. Missing it is not theoretical — an
+   agent who opens Insights before Dashboard walks straight past a gate that only Dashboard has. */
+const PROJPAGES = {dash:'Dashboard', insights:'Insights', coaching:'Coaching'};
+
+function projHead(p, cta){
+  const locked = projLocked(p.name);
+  return `<div class="dashhead">
+      <button class="dashsel" onclick="S.dashSel=!S.dashSel;render()">${esc(p.name)}
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="sp"></div>
+      ${cta||''}
+      ${S.dashSel&&!locked?`<div class="dashmenu">${JOINED.map(j=>`
+        <button class="dashopt" onclick="pickDash('${j.id}')">
+          <span>${esc(j.name)}</span>
+          ${projLocked(j.name)?`<span class="lockchip">${DOCMARK}Signature required</span>`:''}
+        </button>`).join('')}</div>`:''}
+    </div>`;
+}
+/* One shell for all three. The gate takes the place of the body, never of the header — the
+   agent keeps the project selector, so switching to a project they can still open is one click
+   and not a dead end. */
+function projPage(kind){
+  const p = JOINED.find(x=>x.id===S.dashProject) || JOINED[0];
+  const locked = projLocked(p.name);
+  /* Handle Contacts Now hands the agent off to the client platform to do the work, so it is
+     the one control on these pages that has to go dead with the contract. */
+  const cta = kind==='dash'
+    ? `<button class="btn pri" ${locked?'disabled':''}
+        onclick="toast('Would hand you off to the client platform to work')">Handle Contacts Now</button>`
+    : '';
+  /* The page itself renders as normal. A modal blocker covers it — a scrim inset from the left
+     so the nav rail stays live — which is what makes this a *modal* rather than the inline gate:
+     the agent sees the project sitting behind the thing stopping them. */
+  const body = kind==='dash' ? dashBody() : kind==='insights' ? insightsBody() : coachingBody();
+  /* Dashboard keeps the branded column. Insights puts its reliability metrics in the rail as
+     plain cards under a heading, the way the real screen does. Coaching has no rail.
+     A locked project has no rail either, whichever page it is. The rail carries that project's
+     numbers — star rating, earnings, adherence — so leaving it up beside the gate would publish
+     the very figures the gate is there to withhold. The gate covers exactly what it blocks: the
+     whole content area, with only the project selector left standing so the agent can move on. */
+  const aside = kind==='dash'
+    ? `<aside class="dashside">
+         <div class="sidecard"><b>4.2</b><span class="stars">\u2605\u2605\u2605\u2605<span class="dim">\u2605</span></span>
+           <div class="sl2">Star Rating</div></div>
+         <div class="sidecard"><div class="sl2">Total earnings</div><b style="font-size:26px">\u20B999k</b>
+           <div class="ms">\u20B969,321.95 base \u00B7 \u20B930,600.00 star bonus</div></div>
+       </aside>`
+    : kind==='insights'
+    ? `<aside class="dashside plain">
+         <div class="railttl">Reliability Metrics<span class="ms">Previous week data</span></div>
+         <div class="relcard">
+           <div class="relhd">${NAVICON['calendar']}Schedule adherence</div>
+           <div class="relbig"><span class="relpill good">97%</span>
+             <span class="relstar">\u2b50 You're a STAR!</span></div>
+           <div class="relsub">Preferred agent average <b>99%</b></div>
+         </div>
+         <div class="relcard">
+           <div class="relhd">${BANICON}Cancellation rate</div>
+           <div class="relbig"><span class="relpill bad">15%</span></div>
+           <div class="relsub">Preferred agent average <b>8%</b></div>
+         </div>
+         <div class="relcard">
+           <div class="relhd">${BOLTICON}Surge minutes delivered</div>
+           <div class="relbig"><b style="font-size:30px;letter-spacing:-.02em">9,999</b>
+             <span class="relsub" style="margin:0">mins</span></div>
+         </div>
+       </aside>`
+    : '';
+  return `<div class="dashgrid ${aside?'':'solo'}"><div class="dashmain">
+    ${kind==='dash'?`<h1 class="hi" style="margin-bottom:18px">Welcome back, Olivia!</h1>`:''}
+    ${projHead(p, cta)}
+    ${body}
+  </div>${aside}</div>
+  ${locked?projModal(p):''}`;
+}
+function dashHTML(){ return projPage('dash'); }
+
+/* ============================================================
+   PROJECT MODAL BLOCKER  — the PO's option
+   ============================================================ */
+/* No close button, no Escape, no click-through on the scrim. The only way out of the modal is
+   to go and sign, or to pick a different project — and the project switcher has to live inside
+   the modal, because the modal covers the one in the page header. */
+function projModal(p){
+  const due  = PROJECTDOCS.filter(d=>d.project===p.name && !d.signed);
+  const open = JOINED.filter(x=>!projLocked(x.name));
+  return `<div class="projscrim">
+    <div class="projmodal">
+      ${/* One wording for both cases — a contract the client has just added, and a signature
+             that has fallen due for renewal. This modal is a signpost, not the explanation: it
+             does not show the document, it routes to Settings → Legal, and that is where the
+             case-specific copy already lives. Saying "added" or "new" here would be wrong half
+             the time, and saying both would be noise on a screen whose only job is to point. */''}
+      <h3>Sign your contract${due.length>1?'s':''} to open ${esc(p.name)}</h3>
+      <p>Review and sign the contract${due.length>1?'s':''} below in Settings → Legal to open this
+        project. Everything else in the portal still works.</p>
+      <div class="mdocs">${due.map(d=>`
+        <div class="mdoc"><span class="ri">${DOCMARK}</span>
+          <span><b>${esc(d.title)}</b></span></div>`).join('')}
+      </div>
+      <button class="btn pri wide" onclick="go('legal')">Go to Settings</button>
+      ${open.length?`<div class="mswitch">
+        <span class="ml">Or open a different project</span>
+        <button class="mpick" onclick="event.stopPropagation();S.modalSel=!S.modalSel;render()">
+          <span>${esc(p.name)}</span>${CHEV}</button>
+        ${S.modalSel?`<div class="dashmenu">${JOINED.map(j=>`
+          <button class="dashopt" onclick="pickDash('${j.id}')">
+            <span>${esc(j.name)}</span>
+            ${projLocked(j.name)?`<span class="lockchip">${DOCMARK}Signature required</span>`:''}
+          </button>`).join('')}</div>`:''}
+      </div>`:`<div class="mswitch"><span class="ml">Every project you are on is waiting on a
+        signature, so there is nothing to switch to yet.</span></div>`}
+    </div>
+  </div>`;
+}
+
+function dashBody(){
+  return `<div class="metrics">
+      ${[['30','Ticket Closure','Project average 50'],['3.8','Resolution','Project average 3.86'],
+         ['3.55','Agent CSAT','Project average 3.59']].map(([n,l,sub])=>`
+        <div class="metric"><b>${n}</b><div class="ml">${l}</div><div class="ms">${sub}</div></div>`).join('')}
+    </div>
+    <div class="pcard" style="margin-top:22px">
+      <div class="subtabs"><button class="subtab on">Contact History</button>
+        <button class="subtab" onclick="toast('Not part of this prototype')">Invoices</button>
+        <button class="subtab" onclick="toast('Not part of this prototype')">Pay Details</button></div>
+      <table class="dashtbl"><thead><tr><th>Star Ratings</th><th>Start Time</th><th>Duration</th>
+        <th>Contact Outcome</th><th>Earnings</th></tr></thead><tbody>
+        ${[['3.5','2026/09/04 21:18','23:24:43','Order Success','\u20B910.50'],
+           ['4.5','2026/09/04 21:17','01:26:08','Order Success','\u20B920.00'],
+           ['3.9','2026/09/03 22:22','23:24:43','Order Success','\u20B911.23'],
+           ['2.5','2026/09/03 11:28','01:26:08','Delivery w/without cc','\u20B920.00']].map(r=>
+          `<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join('')}
+      </tbody></table>
+    </div>`;
+}
+/* Enough of each page to be recognisable at a glance — the point is that the contract reaches
+   these pages, not that the numbers are real. */
+const BANICON  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg>';
+const BOLTICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 4 14 11 14 10 22 20 9 13 9 13 2"/></svg>';
+const PERSON1  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/></svg>';
+const PERSON2  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="9" cy="8" r="3.4"/><path d="M2 21c0-3.9 3.1-7 7-7s7 3.1 7 7"/><path d="M16.5 5.2a3.4 3.4 0 0 1 0 5.6M17.5 14.3c2.6.7 4.5 3 4.5 5.7"/></svg>';
+const STARLINE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 3 14.9 9.2 21.5 10 16.7 14.6 17.9 21.2 12 18 6.1 21.2 7.3 14.6 2.5 10 9.1 9.2 12 3"/></svg>';
+
+function insightsBody(){
+  const tabs = [['Star Rating',1],['Handle Time',0],['Sentiment',0],['Ticket Price',0],
+                ['Adherence',0],['Cancellation',0]];
+  const months = ['May','Jun','Jul','Aug','Sep','Oct','Nov'];
+  const aht = [
+    [PERSON1, 'You',            'Weekly average', ['328','300','332','332'], [0,1,0,0]],
+    [PERSON2, 'Project',        'Weekly average', ['400','120','400','400'], [0,0,0,0]],
+    [STARLINE,'Five-star Goal', 'Target time',    ['350','90','350','350'],  [0,0,0,0]]
+  ];
+  const board = [['Cat D.','CD','4.1'],['Jay K.','JK','4.0'],['Paul Q.','PQ','4.0']];
+  return `<div class="pcard">
+      <div class="subtabs">${tabs.map(([t,on])=>`<button class="subtab ${on?'on':''}"
+        ${on?'':`onclick="toast('Not part of this prototype')"`}>${t}</button>`).join('')}</div>
+      <div class="cardhd">
+        <h3 class="secttl" style="margin:0">Star Rating</h3>
+        <div class="sp"></div>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Monthly ${CHEV}</button>
+      </div>
+      <div class="chartkey"><span class="k1">XX Star Agents</span><span class="k2">Project</span>
+        <span class="k3">You</span><span class="k4">No data</span></div>
+      <div class="chartph">
+        <svg viewBox="0 0 640 190" preserveAspectRatio="none" aria-hidden="true">
+          ${[38,76,114,152].map(y=>`<line x1="0" y1="${y}" x2="640" y2="${y}" stroke="#e8eef1" stroke-width="1"/>`).join('')}
+          <path d="M0 150 C 90 34 160 26 250 108 S 420 186 520 66 640 40 640 40" fill="none" stroke="#d444a6" stroke-width="3"/>
+          <path d="M0 118 C 100 118 150 56 250 52 S 430 150 530 58 640 38 640 38" fill="none" stroke="#2e90fa" stroke-width="3"/>
+          <path d="M0 104 C 110 104 150 166 250 130 S 430 98 640 106" fill="none" stroke="#6172f3" stroke-width="3"/>
+        </svg>
+        <div class="chartx">${months.map(m=>`<span>${m} 2026</span>`).join('')}</div>
+      </div>
+    </div>
+
+    <div class="ahtgrid">
+      <div class="ahtcard">
+        <div><span class="n">375 sec</span><span class="l">${PERSON1} Your Average</span></div>
+        <div><span class="n">280 sec</span><span class="l">${PERSON2} Project Average</span></div>
+        <div class="goal"><span class="n">270 sec</span><span class="l">\u2b50 Five-star Goal</span></div>
+      </div>
+      <div class="pcard">
+        <h3 class="secttl" style="margin-top:0">Subcomponents of Average Handle Time</h3>
+        <p class="scopenote" style="margin:-8px 0 14px">Improve <b>AHT</b> by achieving the following
+          subcomponent targets</p>
+        <table class="ahttbl"><thead><tr><th></th><th>Tech Support</th>
+          <th>Cancellations &amp; Refunds</th><th>New Listing \u2013 Email</th>
+          <th>Password Reset \u2013 Chat</th></tr></thead><tbody>
+          ${aht.map(([ic,nm,sub,vals,flags])=>`<tr>
+            <td><span class="ahtwho">${ic}<span><b>${nm}</b><i>${sub}</i></span></span></td>
+            ${vals.map((v,i)=>`<td class="${flags[i]?'lo':'hi'}">${v}<span class="u">sec</span></td>`).join('')}
+          </tr>`).join('')}
+        </tbody></table>
+      </div>
+    </div>
+
+    <div class="pcard" style="margin-top:22px">
+      <div class="cardhd">
+        <h3 class="secttl" style="margin:0">Leaderboard</h3>
+        <span class="lbchip">You're crushing it! Keep pushing to reach the top.</span>
+        <div class="sp"></div>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Daily ${CHEV}</button>
+      </div>
+      <table class="dashtbl"><thead><tr><th>Rank</th><th>Name</th><th>Star Rating</th></tr></thead><tbody>
+        ${board.map(([nm,in2,st],i)=>`<tr>
+          <td><span class="rank">${i+1}</span></td>
+          <td><span class="lbname"><span class="av">${in2}</span>${nm}</span></td>
+          <td><b>${st} \u2b50</b>
+            <div>${['Estimated Gross Profits: 80%','First Contact Resolution: $576',
+                   'Call Abandonment Rate: 87.4','Total Mins: 576']
+                   .map(c=>`<span class="mchip">${c}</span>`).join('')}</div></td>
+        </tr>`).join('')}
+      </tbody></table>
+    </div>`;
+}
+
+function coachingBody(){
+  const beh = [['Accuracy','ok','warn'],['Assumptive Sales','bad','ok'],['Rebuttals','bad','ok'],
+               ['Efficiency / Tools','bad','ok'],['Discovery','warn','warn']];
+  const fb = [['Dec 15, 2023','3.5','Sales with Prepaid','4','300','5',1],
+              ['Oct 16, 2023','3.6','Cancellations &amp; Refunds','4','300','3',0],
+              ['Oct 16, 2023','3.1','Tech Support','4','300','4',1],
+              ['Oct 9, 2023','3.2','Lorem ipsum dolor sit consectet','4','300','5',0]];
+  return `<div class="pcard">
+      <h3 class="secttl" style="margin-top:0">Performance Summary</h3>
+      <div class="cgrid">
+        <div class="cpanel">
+          <div class="cph">Contact monitoring</div>
+          <div class="crow chd"><span>Behaviours</span><span class="sp"></span><span>Own</span><span>Experts</span></div>
+          ${beh.map(([n,a,b])=>`<div class="crow"><span>${n}</span><span class="sp"></span>
+            <span class="cdot ${a}"></span><span class="cdot ${b}"></span></div>`).join('')}
+        </div>
+        <div class="cpanel">
+          <div class="cph">Monthly star rating</div>
+          <div class="cbig"><b>4.8 \u2b50</b><span class="cdelta">\u25b2 7%</span>
+            <div class="ms">Compared to 4.5 last month</div></div>
+          <div class="crow"><span>Project avg star rating (MTD)</span><span class="sp"></span><b>4.5</b></div>
+          <div class="crow"><span>Top performers minimum</span><span class="sp"></span><b>4.6</b></div>
+        </div>
+      </div>
+      <div class="metrics" style="margin-top:16px">
+        ${[['10','Red flags','#c8372a'],['05','Cancellations','#c8372a'],
+           ['Advanced','Overall experts rating','#0a7a5c'],['#2','Streak rank','#3538cd'],
+           ['#5','Star rating rank','#b45309']].map(([n,l,c])=>`
+          <div class="metric"><b style="color:${c}">${n}</b><div class="ml">${l}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="fbbanner"><h3>Feedback</h3></div>
+    <div class="pcard fbcard">
+      <div class="filtbar">
+        <button class="selpill" onclick="toast('Not part of this prototype')">${NAVICON['calendar']}Select date</button>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Star Rating ${CHEV}</button>
+        <button class="selpill" onclick="toast('Not part of this prototype')">Contact Outcome ${CHEV}</button>
+        <button class="btn pri sm" disabled>Apply filter</button>
+      </div>
+      <div class="fbcount">23 Feedback</div>
+      <table class="dashtbl"><thead><tr><th>Date</th><th>\u2b50</th><th>Contact Outcome</th>
+        <th>Sentiment</th><th>Avg. Handle Time</th><th>CSAT</th><th></th></tr></thead><tbody>
+        ${fb.map(([dt,st,oc,se,ht,cs,flag],i)=>`<tr class="${i?'':'sel'}">
+          <td>${dt}</td><td>${st}</td><td>${oc}</td><td>${se}</td><td>${ht}</td><td>${cs}</td>
+          <td>${flag?`<span class="fbdot">!</span>`:''}</td></tr>`).join('')}
+      </tbody></table>
+    </div>
+
+    <div class="pcard" style="margin-top:16px">
+      <div class="fbmeta">
+        <div class="fbtile"><span class="l">Contact Outcome</span><b>Sales with Prepaid</b></div>
+        <div class="fbtile"><span class="l">${STARLINE}Star Rating</span><b>3.5</b></div>
+        <div class="fbids">Date: <b>Oct 23, 2023</b><br>Contact ID: <b>armn-1254-yyyy-0010</b></div>
+      </div>
+      <div class="fbgrid">
+        <div>
+          <div class="fbhd"><span class="fbtag">OWN</span><span class="sp"></span>
+            <span class="ms">Oct 25, 2023</span></div>
+          <p class="fbnote">Handled the prepaid objection well and kept the customer on the call, but
+            skipped the discovery questions and went straight to the offer.</p>
+          <div class="fbhd"><span class="fbtag">EXPERTS</span><span class="sp"></span>
+            <span class="ms">Nov 1, 2023</span></div>
+          <p class="fbnote">Agreed on the objection handling. Discovery would have surfaced the second
+            line on the account, which is where the upsell was.</p>
+        </div>
+        <div class="cpanel" style="align-self:start">
+          <div class="crow chd"><span></span><span class="sp"></span><span>Own</span><span>Experts</span></div>
+          ${beh.map(([n,a,b])=>`<div class="crow"><span>${n}</span><span class="sp"></span>
+            <span class="cdot sm ${a}"></span><span class="cdot sm ${b}"></span></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+
+/* ============================================================
+   PROJECT WORKSPACE — where an ongoing agent takes on new work
+   ============================================================ */
+function openWork(id){
+  /* The contract comes first — the workspace is project work too. */
+  const jp = JOINED.find(x=>x.id===id);
+  if(jp && projLocked(jp.name)) return openProjectDash(id);
+  S.view='work'; S.workProject=id; S.taskOpen=false; closeScrim(); render();
+}
+function workHTML(){
+  const p = JOINED.find(x=>x.id===S.workProject) || JOINED[0];
+  const tasks = p.mode==='tasks';
+  return `<button class="backlink" onclick="go('home')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>
+      Ongoing Projects</button>
+    <h1 class="hi" style="margin-bottom:6px">${esc(p.name)}</h1>
+    <p style="margin:0 0 26px;color:var(--ink3)">${tasks?'Data labelling · work any time':'Inbound · scheduled shifts'}</p>
+    <div class="pcard">
+      ${S.taskOpen?`<div class="worknow">
+        <div><b>${tasks?'Task #4821':'Shift · today 14:00–18:00'}</b>
+          <div class="meta">${tasks?'Started just now · 40 items in this batch':'In progress'}</div></div>
+        <div class="sp"></div>
+        <button class="btn pri" onclick="submitWork()">${tasks?'Submit task':'End shift'}</button>
+      </div>`:''}
+      <div class="workfoot">
+        <div class="footnote" style="color:var(--ink3)">${
+          tasks?'18 tasks available in this batch.':'3 shifts open this week.'}</div>
+        <button class="btn pri" ${S.taskOpen?'disabled':''} onclick="startWork()">${
+          tasks?'Claim next task':'Book next shift'}</button>
+      </div>
+    </div>
+    <p class="workclean">Nothing on this screen is ever gated by an unsigned contract — outstanding
+      signatures live in the setup guide and Settings → Legal.</p>`;
+}
+function startWork(){
+  const p = JOINED.find(x=>x.id===S.workProject);
+  S.taskOpen=true; render();
+  toast(p.mode==='tasks'?'Task claimed. Work on it whenever you like.':'Shift booked.');
+}
+function submitWork(){
+  const p = JOINED.find(x=>x.id===S.workProject);
+  S.taskOpen=false; render();
+  toast(p.mode==='tasks'?"Task submitted. It's now in review.":'Shift completed.');
+}
+
+/* ============================================================
+   APPLY → project documents (the legacy flow, untouched)
+   ============================================================ */
+function applyNow(){ drawProjectDocs(); }
+function drawProjectDocs(){
+  const p = AVAIL.find(x=>x.id===S.openProject);
+  if(!p) return closeScrim();
+  const all = S.docs.sow && S.docs.nda;
+  const row = (k)=>`<div class="req ${S.docs[k]?'':'hard'}" style="${S.docs[k]?'background:var(--teal-s);border-color:#bfe6d7':''}">
+    <span class="ri ${S.docs[k]?'ok':''}">${S.docs[k]?TICKMARK:DOCMARK}</span>
+    <span class="rt"><b>${DOCS[k].title}</b>
+      <span class="reqsub">${S.docs[k]?'Signed just now':'Not signed yet'}</span></span>
+    ${S.docs[k]?'':`<button class="btn ghost sm" onclick="openDoc('${k}','docs')">Review &amp; sign</button>`}
+  </div>`;
+  scrim(`<div class="modal" style="width:min(620px,100%)">
+    <div class="mhead"><h3>Apply to ${esc(p.name)}</h3>
+      <button class="x" onclick="drawProject()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button></div>
+    <div class="mbody">
+      <p style="margin:0 0 16px;color:var(--ink2);font-size:14.5px">This client asks every agent on the project to
+        sign the contracts below. They cover this project only.</p>
+      <div class="reqs softonly" style="margin-top:0">${row('sow')}${row('nda')}</div>
+    </div>
+    <div class="mfoot"><div class="sp"></div>
+      <button class="btn" onclick="drawProject()">Back</button>
+      <button class="btn pri" ${all?'':'disabled'} onclick="finishApply()">Confirm application</button>
+    </div>
+  </div>`);
+}
+function finishApply(){
+  const p = AVAIL.find(x=>x.id===S.openProject);
+  S.applied.push(S.openProject); S.openProject=null;
+  S.tab='joined'; S.sub='pending'; S.page=1;
+  closeScrim(); render();
+  toast("Applied to "+p.name+". It's now in your Pending Projects.");
+}
+
+function completeGigReqs(){ S.gigReqs=true; render(); toast('Gig Requirements complete.'); }
+
+/* ============================================================
+   LEFT NAV  (icons + spec lifted from the Figma sidebar frames)
+   ============================================================ */
+const NAVICON = {
+  'home': '<svg viewBox="0 0 24 24" fill="none"> <path d="M9 22V12H15V22M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'trello': '<svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><rect x="7" y="7" width="3" height="9" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><rect x="14" y="7" width="3" height="5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+  'calendar': '<svg viewBox="0 0 24 24" fill="none"> <path d="M16 2V6M8 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'trending-up': '<svg viewBox="0 0 24 24" fill="none"> <path d="M23 6L13.5 15.5L8.5 10.5L1 18M23 12V6H17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'rocket': '<svg viewBox="0 0 24 24" fill="none"> <path d="M13.3248 10.6752L5.44059 18.5594M6.29145 12.8375L2.42965 11.9253C2.00478 11.825 1.85535 11.2975 2.16313 10.9886L5.23428 7.91744C5.44059 7.71113 5.72049 7.59292 6.01378 7.59069L9.47635 7.56059M13.8377 3.59842C16.4149 5.35591 18.6441 7.58512 20.4016 10.1623M11.1614 17.7085L12.0736 21.5703C12.1739 21.9952 12.7014 22.1447 13.0103 21.8369L16.0814 18.7657C16.2878 18.5594 16.406 18.2795 16.4082 17.9862L16.4383 14.5236M21.0629 8.35012L21.9639 4.01438C22.2093 2.83454 21.1655 1.79075 19.9856 2.03608L15.6499 2.93713C14.373 3.20254 13.2021 3.83483 12.281 4.75707L8.72362 8.31332C7.36647 9.67047 6.48326 11.4302 6.20447 13.3293L6.19221 13.4107C6.01601 14.6229 6.42193 15.8462 7.28729 16.7127C8.15266 17.5781 9.3771 17.984 10.5893 17.8067L10.6707 17.7944C12.5698 17.5167 14.3295 16.6324 15.6867 15.2753L19.2429 11.719C20.1652 10.7979 20.7975 9.62698 21.0629 8.35012Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'dollar-sign': '<svg viewBox="0 0 24 24" fill="none"> <path d="M12 1V23M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'user-plus': '<svg viewBox="0 0 24 24" fill="none"> <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21M20 8V14M23 11H17M12.5 7C12.5 9.20914 10.7091 11 8.5 11C6.29086 11 4.5 9.20914 4.5 7C4.5 4.79086 6.29086 3 8.5 3C10.7091 3 12.5 4.79086 12.5 7Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'settings': '<svg viewBox="0 0 24 24" fill="none"> <path d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> <path d="M19.4 15C19.2669 15.3016 19.2272 15.6362 19.286 15.9606C19.3448 16.285 19.4995 16.5843 19.73 16.82L19.79 16.88C19.976 17.0657 20.1235 17.2863 20.2241 17.5291C20.3248 17.7719 20.3766 18.0322 20.3766 18.295C20.3766 18.5578 20.3248 18.8181 20.2241 19.0609C20.1235 19.3037 19.976 19.5243 19.79 19.71C19.6043 19.896 19.3837 20.0435 19.1409 20.1441C18.8981 20.2448 18.6378 20.2966 18.375 20.2966C18.1122 20.2966 17.8519 20.2448 17.6091 20.1441C17.3663 20.0435 17.1457 19.896 16.96 19.71L16.9 19.65C16.6643 19.4195 16.365 19.2648 16.0406 19.206C15.7162 19.1472 15.3816 19.1869 15.08 19.32C14.7842 19.4468 14.532 19.6572 14.3543 19.9255C14.1766 20.1938 14.0813 20.5082 14.08 20.83V21C14.08 21.5304 13.8693 22.0391 13.4942 22.4142C13.1191 22.7893 12.6104 23 12.08 23C11.5496 23 11.0409 22.7893 10.6658 22.4142C10.2907 22.0391 10.08 21.5304 10.08 21V20.91C10.0723 20.579 9.96512 20.258 9.77251 19.9887C9.5799 19.7194 9.31074 19.5143 9 19.4C8.69838 19.2669 8.36381 19.2272 8.03941 19.286C7.71502 19.3448 7.41568 19.4995 7.18 19.73L7.12 19.79C6.93425 19.976 6.71368 20.1235 6.47088 20.2241C6.22808 20.3248 5.96783 20.3766 5.705 20.3766C5.44217 20.3766 5.18192 20.3248 4.93912 20.2241C4.69632 20.1235 4.47575 19.976 4.29 19.79C4.10405 19.6043 3.95653 19.3837 3.85588 19.1409C3.75523 18.8981 3.70343 18.6378 3.70343 18.375C3.70343 18.1122 3.75523 17.8519 3.85588 17.6091C3.95653 17.3663 4.10405 17.1457 4.29 16.96L4.35 16.9C4.58054 16.6643 4.73519 16.365 4.794 16.0406C4.85282 15.7162 4.81312 15.3816 4.68 15.08C4.55324 14.7842 4.34276 14.532 4.07447 14.3543C3.80618 14.1766 3.49179 14.0813 3.17 14.08H3C2.46957 14.08 1.96086 13.8693 1.58579 13.4942C1.21071 13.1191 1 12.6104 1 12.08C1 11.5496 1.21071 11.0409 1.58579 10.6658C1.96086 10.2907 2.46957 10.08 3 10.08H3.09C3.42099 10.0723 3.742 9.96512 4.0113 9.77251C4.28059 9.5799 4.48572 9.31074 4.6 9C4.73312 8.69838 4.77282 8.36381 4.714 8.03941C4.65519 7.71502 4.50054 7.41568 4.27 7.18L4.21 7.12C4.02405 6.93425 3.87653 6.71368 3.77588 6.47088C3.67523 6.22808 3.62343 5.96783 3.62343 5.705C3.62343 5.44217 3.67523 5.18192 3.77588 4.93912C3.87653 4.69632 4.02405 4.47575 4.21 4.29C4.39575 4.10405 4.61632 3.95653 4.85912 3.85588C5.10192 3.75523 5.36217 3.70343 5.625 3.70343C5.88783 3.70343 6.14808 3.75523 6.39088 3.85588C6.63368 3.95653 6.85425 4.10405 7.04 4.29L7.1 4.35C7.33568 4.58054 7.63502 4.73519 7.95941 4.794C8.28381 4.85282 8.61838 4.81312 8.92 4.68H9C9.29577 4.55324 9.54802 4.34276 9.72569 4.07447C9.90337 3.80618 9.99872 3.49179 10 3.17V3C10 2.46957 10.2107 1.96086 10.5858 1.58579C10.9609 1.21071 11.4696 1 12 1C12.5304 1 13.0391 1.21071 13.4142 1.58579C13.7893 1.96086 14 2.46957 14 3V3.09C14.0013 3.41179 14.0966 3.72618 14.2743 3.99447C14.452 4.26276 14.7042 4.47324 15 4.6C15.3016 4.73312 15.6362 4.77282 15.9606 4.714C16.285 4.65519 16.5843 4.50054 16.82 4.27L16.88 4.21C17.0657 4.02405 17.2863 3.87653 17.5291 3.77588C17.7719 3.67523 18.0322 3.62343 18.295 3.62343C18.5578 3.62343 18.8181 3.67523 19.0609 3.77588C19.3037 3.87653 19.5243 4.02405 19.71 4.21C19.896 4.39575 20.0435 4.61632 20.1441 4.85912C20.2448 5.10192 20.2966 5.36217 20.2966 5.625C20.2966 5.88783 20.2448 6.14808 20.1441 6.39088C20.0435 6.63368 19.896 6.85425 19.71 7.04L19.65 7.1C19.4195 7.33568 19.2648 7.63502 19.206 7.95941C19.1472 8.28381 19.1869 8.61838 19.32 8.92V9C19.4468 9.29577 19.6572 9.54802 19.9255 9.72569C20.1938 9.90337 20.5082 9.99872 20.83 10H21C21.5304 10 22.0391 10.2107 22.4142 10.5858C22.7893 10.9609 23 11.4696 23 12C23 12.5304 22.7893 13.0391 22.4142 13.4142C22.0391 13.7893 21.5304 14 21 14H20.91C20.5882 14.0013 20.2738 14.0966 20.0055 14.2743C19.7372 14.452 19.5268 14.7042 19.4 15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  'log-out': '<svg viewBox="0 0 24 24" fill="none"> <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9M16 7L21 12L16 17M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'book': '<svg viewBox="0 0 24 24" fill="none"> <path d="M4 19.5C4 18.837 4.26339 18.2011 4.73223 17.7322C5.20107 17.2634 5.83696 17 6.5 17H20M4 19.5C4 20.163 4.26339 20.7989 4.73223 21.2678C5.20107 21.7366 5.83696 22 6.5 22H20V2H6.5C5.83696 2 5.20107 2.26339 4.73223 2.73223C4.26339 3.20107 4 3.83696 4 4.5V19.5Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>',
+  'help-circle': '<svg viewBox="0 0 24 24" fill="none"> <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13M12 17H12.01M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/> </svg>'
+};
+const NAVITEMS = [
+  {ic:'home',        lbl:'Home',      view:'home'},
+  {ic:'trello',      lbl:'Dashboard', view:'dash'},
+  {ic:'calendar',    lbl:'Schedule'},
+  {ic:'trending-up', lbl:'Insights', view:'insights'},
+  {ic:'rocket',      lbl:'Coaching', view:'coaching'},
+  {ic:'dollar-sign', lbl:'Earnings'},
+  {ic:'user-plus',   lbl:'Referrals'}
+];
+const ACCTMENU = [
+  {ic:'log-out',     lbl:'Logout', danger:true},
+  {ic:'settings',    lbl:'Account Settings', view:'legal'},
+  {ic:'book',        lbl:'Skills Center'},
+  {ic:'help-circle', lbl:'Gig Corner'}
+];
+function navBtn(it){
+  const on = it.view && (S.view===it.view || (it.view==='legal' && S.view==='doc'));
+  const act = it.view ? `go('${it.view}')` : `toast('${it.lbl} is not part of this prototype')`;
+  return `<button class="ritem ${on?'on':''} ${it.danger?'danger':''}" onclick="closeAcct();${act}">
+    ${NAVICON[it.ic]}<b>${it.lbl}</b></button>`;
+}
+function railHTML(){
+  return `<div class="railin">
+    <div class="rnav">
+      <div class="rlogo">
+        <span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
+        <span class="word">Agents<br>Only</span></div>
+      <div class="rgroup">${NAVITEMS.map(navBtn).join('')}</div>
+    </div>
+    <div class="rfoot">
+      <div class="rgroup tight">
+        <button class="ritem ${(S.view==='legal'||S.view==='doc')?'on':''}" onclick="toggleAcct(event)">
+          ${NAVICON['settings']}<b>Settings</b></button></div>
+      <div class="rdiv"></div>
+      <div class="racct"><span class="rav"></span><b>Olivia Rhye</b></div>
+    </div>
+  </div>`;
+}
+function closeAcct(){
+  document.getElementById('railsub').innerHTML='';
+  document.getElementById('rail').classList.remove('pin');
+}
+function toggleAcct(e){
+  e.stopPropagation();
+  const host=document.getElementById('railsub');
+  if(host.innerHTML) return closeAcct();
+  document.getElementById('rail').classList.add('pin');   // keep the nav open while the menu is
+  host.innerHTML=`<div class="rsub">${ACCTMENU.map(navBtn).join('')}</div>`;
+  /* Line "Account Settings" up with the Settings item that opened the menu. */
+  const sub=host.firstElementChild, r=e.currentTarget.getBoundingClientRect();
+  const anchor=sub.children[1];
+  const want = r.top + r.height/2 - (anchor.offsetTop + anchor.offsetHeight/2);
+  sub.style.left = '240px';
+  sub.style.top  = Math.min(window.innerHeight - sub.offsetHeight - 8, Math.max(8, want)) + 'px';
+  setTimeout(()=>document.addEventListener('click',closeAcct,{once:true}),0);
+}
+
+/* ============================================================
+   PLATFORM CONTRACT GATE
+   ============================================================ */
+/* A gate should cover exactly what it blocks, and no more.
+     platform contract -> the whole portal, so a full-screen scrim
+     project contract  -> that project's dashboard body, so the rail, the project selector
+                          and every other section stay reachable.
+   Blocking the portal over one project would lock an agent out of Schedule, Earnings and
+   Referrals, which that contract has no claim on — and if it is their only project,
+   "choose another" is an empty offer. */
+/* More than one contract can be outstanding at once, so a gate is a queue. One document goes
+   straight to the document; several list themselves first, so the agent can see what they are
+   in for rather than meeting them one at a time. Same rule as the reminder widget: name it at
+   one, count it past one. */
+/* The set is every contract in this round, signed or not — so one already accepted stays
+   listed and re-readable while the agent works through the rest. The queue is what is left. */
+/* Platform only here. In this variant the project tier is a modal that sends the agent to
+   Settings → Legal, so it never hosts a contract card of its own. */
+function gateSet(){ return PLATFORMDOCS.filter(d=>d.reissued); }
+const gateQueue = () => gateSet().filter(d=>!d.signed);
+function gateDoc(){
+  const set = gateSet(), q = gateQueue(); if(!q.length) return null;
+  if(S.gateList) return null;                 // the agent asked for the list explicitly
+  if(S.gatePick){ const d=set.find(x=>x.id===S.gatePick); if(d) return d; }
+  return q.length===1 ? q[0] : null;          // null means: show the list
+}
+function pickGateDoc(id){ S.gateList=false; S.gatePick=id; S.gateName=''; S.gateChk=false; S.gatePage=1; render(); }
+function backToQueue(){ S.gateList=true; S.gatePick=null; S.gateName=''; S.gateChk=false; S.gatePage=1; render(); }
+
+function gateListHTML(){
+  const set = gateSet(), q = gateQueue();
+  const platform = !set[0].project;
+  const allResign = !platform && q.every(d=>isResign(d));
+  return `<div class="gatehead">
+      <h3>${q.length} of ${set.length} contracts need your signature</h3>
+      <p>${platform
+        ? `We've issued new agreements between you and AgentsOnly. Accept all of them to carry
+           on using the portal.`
+        : allResign
+          ? `Your signatures on these contracts have expired under your country's contractor law.
+             They are the same documents you already signed — sign them again before you can work
+             on this project or open its dashboard, insights or coaching. Everything else in the
+             portal still works.`
+          : `${esc(q[0].project)} has added new contracts. Sign all of them before you can work on this
+             project or open its dashboard, insights or coaching. Everything else in the portal
+             still works.`}</p>
+    </div>
+    <div class="gatebody">
+      <div class="reqs">
+        ${set.map(d=>`<div class="req">
+          <span class="ri ${d.signed?'ok':''}">${d.signed?TICKMARK:DOCMARK}</span>
+          <span class="rt"><b>${esc(d.title)}${platform?' V'+d.version:''}</b>
+            ${/* No scope chip. Every row in this list has the same scope, and the paragraph above
+                 has already said it in a sentence — so the chip only added a row of noise. */''}
+            ${d.signed?`<span class="chiprow">${signedTag(d.signedOn)}</span>`:''}
+            ${platform?`<span class="reqsub">Effective ${fmt(d.effective)}</span>`:''}</span>
+          <button class="btn ghost sm" onclick="pickGateDoc('${d.id}')">${d.signed?'View':'Review &amp; sign'}</button>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="gatefoot">
+      ${platform?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>
+                  <button class="lnk" onclick="toast('Would open support')">Contact support</button>`:''}
+      <div class="sp"></div>
+    </div>`;
+}
+/* Whatever the host, the content is the list or one document from it. */
+function gateContent(){
+  const q = gateQueue(); if(!q.length) return '';
+  const d = gateDoc();
+  return d ? contractCard(d, gateSet().length>1) : gateListHTML();
+}
+function contractCard(d, fromList){
+  const platform = !d.project;
+  const done  = !!d.signed;                  // already accepted this round — read-only
+  const ready = S.gateName.trim() && S.gateChk;
+  const info = {v:d.version, effective:d.effective, signed:null, current:true};
+  const c = {key:d.id, title:d.title, project:d.project, platform, version:d.version,
+             effective:d.effective, previous:d.previous, pages:d.pages, signedOn:null};
+  return `<div class="gatehead">
+      <h3>${esc(d.title)}${platform?' V'+d.version:''}</h3>
+      ${/* No explainer on the platform card. The scrim behind it already shows the portal is
+             out of reach, and the contract's own opening line says who it binds — so a paragraph
+             saying both was telling the agent what they can already see.
+             The project card keeps its copy, because what it says is not visible anywhere: that
+             the rest of the portal still works and that switching projects is an option. */''}
+      ${/* A renewal has one more thing to explain than a new contract does, and it is the thing
+             the agent will otherwise get wrong: this is the document they already signed, it has
+             not changed, and it is the signature rather than the terms that ran out. */''}
+      ${platform?''
+        : isResign(d)
+        ? `<p>You signed this contract on <b>${fmt(d.signedOn)}</b>. ${renewalWhy(d)} Nothing in the
+             document has changed — sign it again before you can work on this project or open its
+             dashboard, insights or coaching. Everything else in the portal still works, and you
+             can switch projects above.</p>`
+        : `<p>${esc(d.project)} has added this contract. Sign it before you can work on
+           this project or open its dashboard, insights or coaching. Everything else in the portal
+           still works, and you can switch projects above.</p>`}
+    </div>
+    <div class="gatebody">
+      <div class="paperframe"><div class="paperpg">${projectPaper(S.gatePage, info, c)}</div></div>
+      <div class="pager">
+        <button class="pgb" ${S.gatePage===1?'disabled':''} onclick="S.gatePage=${S.gatePage-1};render()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
+        ${Array.from({length:d.pages},(_,i)=>i+1).map(n=>
+          `<button class="pgn ${n===S.gatePage?'on':''}" onclick="S.gatePage=${n};render()">${n}</button>`).join('')}
+        <button class="pgb" ${S.gatePage===d.pages?'disabled':''} onclick="S.gatePage=${S.gatePage+1};render()">Next
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+      <div class="sigsec">
+        <h3>Contractor Signature</h3>
+        <div class="fld"><label for="gfn">Full name</label>
+          <input type="text" id="gfn" autocomplete="off" ${done?'disabled':''}
+                 value="${done?'Olivia O.J Rhye':esc(S.gateName)}"
+                 oninput="S.gateName=this.value;syncGate()"></div>
+        <div class="chkrow">
+          <input type="checkbox" id="gck" ${done||S.gateChk?'checked':''} ${done?'disabled':''}
+                 onchange="S.gateChk=this.checked;syncGate()">
+          <label for="gck">I have read and accepted the ${esc(d.title)}.</label>
+        </div>
+      </div>
+    </div>
+    <div class="gatefoot">
+      ${/* Name the list it goes back to. "All contracts" is a promise this button cannot keep —
+           the list behind it is only the contracts blocking this one thing. "Back" would be
+           accurate but inside a modal it reads as "close", which is the one exit the gate has
+           not got. */''}
+      ${fromList?`<button class="lnk" onclick="backToQueue()">← All ${platform?'platform':esc(d.project)} contracts</button>`:''}
+      ${/* Log out lives on the contract LIST, which is one click back. Repeating it here made
+           three links sit side by side under the signature. It stays on a single-contract gate,
+           where there is no list to go back to and losing it would leave no way out at all. */''}
+      ${platform&&!fromList?`<button class="lnk" onclick="toast('Would log you out')">Log out</button>`:''}
+      ${platform?`<button class="lnk" onclick="toast('Would open support')">Contact support</button>`:''}
+      <div class="sp"></div>
+      ${done ? `<span class="signedline">Signed ${fmt(d.signedOn)}</span>`
+             : `<button class="btn pri sq" id="gbtn" ${ready?'':'disabled'} onclick="acceptGate()">Submit</button>`}
+    </div>`;
+}
+function gateHTML(){
+  if(!platformBlocked()) return '';
+  return `<div class="gatescrim"><div class="gatemodal">${gateContent()}</div></div>`;
+}
+function syncGate(){
+  const b=document.getElementById('gbtn');
+  if(b) b.disabled = !(S.gateName.trim() && S.gateChk);
+}
+function acceptGate(){
+  if(!(S.gateName.trim() && S.gateChk)) return;
+  const d = gateDoc(); if(!d || d.signed) return;
+  d.signed=true; d.signedOn=addDays(TODAY,0);
+  if(!d.project && !PLATFORMDOCS.some(x=>!x.signed)) S.platform='signed';
+  S.gatePick=null; S.gateList=false; S.gateName=''; S.gateChk=false; S.gatePage=1;
+  render();
+  /* Say where it went — the gate replaced the trip through Settings that used to teach this. */
+  toast('Signed. You can read it any time in Settings → Legal.');
+}
+/* Signing a project contract happens in that project's dashboard, because that is the thing
+   being unblocked. */
+function openProjectDash(id){
+  S.view='dash'; S.dashProject=id; S.dashSel=false; S.modalSel=false;
+  S.gatePick=null; S.gateList=false; S.gateName=''; S.gateChk=false; S.gatePage=1;
+  closeScrim(); render();
+}
+
+/* ============================================================
+   PLUMBING
+   ============================================================ */
+const esc = s => String(s??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+function scrim(html){
+  const o=document.getElementById('overlay');
+  o.innerHTML=`<div class="scrim" onclick="closeScrim()">${html}</div>`;
+  const m=o.querySelector('.scrim>*'); if(m) m.onclick=e=>e.stopPropagation();
+}
+function closeScrim(){ S.openProject=null; document.getElementById('overlay').innerHTML=''; }
+function toast(msg){
+  const t=document.createElement('div'); t.className='toast';
+  t.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg><span>${msg}</span>`;
+  document.getElementById('toasts').appendChild(t);
+  setTimeout(()=>t.remove(),4000);
+}
+/* The rail changes the PAGE. It never changes the project.
+   Project and page are independent axes everywhere else in the portal — moving from Dashboard to
+   Insights on a project you can open keeps you on that project — so the blocked case must not be
+   the one place where the rail quietly changes both. An agent who selected RV Rental Platform and
+   then clicks Insights is testing whether the block is page-level or project-level; landing them
+   on a different project answers a question they did not ask, and lets them conclude that Insights
+   is fine when it is not. Meeting the same modal is the honest answer, and it teaches the rule in
+   one move.
+   Nothing traps them: the modal carries its own project switcher, and Home, Schedule, Earnings,
+   Referrals and Settings are all still one click away in the rail. */
+function go(v){
+  S.view=v; S.dashSel=false; S.modalSel=false; closeAcct(); closeScrim(); render();
+}
+/* Redraw the page and, if a project modal is open, the modal too — so flipping a control
+   updates what you are looking at instead of throwing it away. */
+function refresh(){
+  render();
+  if(S.openProject && document.querySelector('#overlay .modal[data-m="project"]')) drawProject();
+}
+/* Full wipe, only from the Reset button. */
+function resetAll(){
+  S.docs={sow:false,nda:false}; S.applied=[];
+  S.gigReqs=false; S.guideCol=false;
+  S.sub='joined'; S.sort='new'; S.page=1; S.tab='available'; S.view='home';
+  S.docKey='ica'; S.docVersion=null; S.signName=''; S.signChk=false;
+  S.taskOpen=false; S.workProject=null;
+  applyDue(); closeScrim(); render();
+}
+/* Which client contracts the client has re-issued and not yet been accepted. */
+function applyDue(){
+  const map = {none:[], p1:['rv-sow'], same:['rv-sow','rv-nda'], two:['rv-sow','qa-dha'],
+               /* A renewal falling due. Same machinery as a re-issue — the document simply goes
+                  back to unsigned — which is the whole point: nothing new is built for it. */
+               renew:['rv-ica']};
+  const unsigned = map[S.due] || [];
+  ['rv-sow','rv-nda','qa-dha','rv-ica'].forEach(id=>{
+    const d = PROJECTDOCS.find(x=>x.id===id);
+    d.reissued = unsigned.includes(id);
+    d.signed   = !unsigned.includes(id);
+    /* Only a contract carrying a re-signing schedule can expire. Everything else that turns up
+       unsigned is a contract the client has just added. */
+    d.resign   = !!(d.renewMonths && d.reissued);
+    if(d.signed) d.signedOn = d.signedOn || addDays(TODAY,0);
+  });
+}
+function setDue(v){ S.due=v; applyDue(); refresh(); }
+function setPlatform(v){
+  S.platform=v;
+  const unsigned = v==='one' ? ['ica'] : v==='two' ? ['ica','dpa'] : [];
+  PLATFORMDOCS.forEach(d=>{
+    d.reissued = unsigned.includes(d.id);
+    d.signed   = !unsigned.includes(d.id);
+    if(d.signed && !d.signedOn) d.signedOn = '2025-02-03';
+  });
+  S.gatePick=null; S.gateList=false; S.gateName=''; S.gateChk=false; S.gatePage=1;
+  refresh();
+}
+function stripHTML(){
+  return `<div class="strip">
+    <span class="scopetag alt">Modal blocker</span>
+    <span class="sl">Platform contract</span>
+    <span class="segwrap">${[['signed','Signed'],['one','1 unsigned'],['two','2 unsigned']].map(([k,l])=>
+      `<button class="sb ${S.platform===k?'on':''}" onclick="setPlatform('${k}')">${l}</button>`).join('')}</span>
+    <span class="sl">Project contracts</span>
+    <span class="segwrap">${[['none','None'],['p1','1'],['same','2 in one'],['two','2 in two'],
+                             ['renew','Renewal due']].map(([k,l])=>
+      `<button class="sb ${S.due===k?'on':''}" onclick="setDue('${k}')">${l}</button>`).join('')}</span>
+    <button class="pb ${S.bankTax?'':'act'}" onclick="toggleBankTax()">Bank &amp; tax: ${S.bankTax?'filled':'missing'}</button>
+    <button class="pb" onclick="resetAll()">Reset</button>
+  </div>`;
+}
+
+
+
+/* Flipping a prerequisite has to redraw whatever project modal is already open, or the
+   footer keeps showing the old verdict. */
+function toggleBankTax(){ S.bankTax=!S.bankTax; refresh(); }
+function render(){
+  document.getElementById('gate').innerHTML  = gateHTML();
+  document.getElementById('rail').innerHTML  = railHTML();
+  document.getElementById('view').innerHTML  =
+      S.view==='home' ? homeHTML()
+      : PROJPAGES[S.view] ? projPage(S.view)
+      : S.view==='work' ? workHTML()
+      : S.view==='doc' ? docHTML() : legalHTML();
+  document.getElementById('strip').innerHTML = stripHTML();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape' && !platformBlocked())closeScrim();});
+/* Reconcile the seeded contracts with whatever the Due control defaults to, so the widget
+   and the toolbar never disagree at startup. */
+applyDue();
+render();
+</script>
+</body>
+</html>
