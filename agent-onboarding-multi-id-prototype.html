@@ -305,16 +305,13 @@ function uploadHTML(){
           '<p class="lede">Upload clear photos or scans. Front and back may be separate files or combined into one.</p>'+
           '<div style="margin-top:28px"></div>';
 
-  /* One uploader per identification NUMBER THE AGENT ACTUALLY GAVE. Offering an
-     upload slot for a document they just told us they do not hold is noise, so
-     the optional uploader is carried over from step 1 rather than always shown. */
-  c.ids.forEach(function(id,i){
-    if(!id.required && !optGiven()) return;
-    h += uploader('id'+i,
-      'Upload the front & back of your '+id.label,
-      'You may upload front and back separately or combine them into one file.',
-      id.required);
-  });
+  /* One uploader only, for the country's mandatory identification. Confirmed with
+     the PO: additional identification numbers are captured on the form and never
+     uploaded, so this instruction can go back to naming a specific document. */
+  h += uploader('id0',
+    'Upload the front & back of your '+c.ids[0].label,
+    'You may upload front and back separately or combine them into one file.',
+    true);
 
   h += uploader('police', c.police,
     'You may upload front and back separately or combine them into one file.', true);
@@ -357,8 +354,8 @@ function setId(i,v){
 }
 function toggleShow(i){ S.shown[i] = !S.shown[i]; render(true); }
 
-var NAMES = {id0:'citizen-card.pdf', id1:'residence-permit.jpg', police:'registo-criminal.pdf'};
-var SIZES = {id0:'1.2 MB', id1:'840 KB', police:'2.1 MB'};
+var NAMES = {id0:'citizen-card.pdf', police:'registo-criminal.pdf'};
+var SIZES = {id0:'1.2 MB', police:'2.1 MB'};
 function attach(k){ S.files[k] = {name:NAMES[k]||'document.pdf', size:SIZES[k]||'1.0 MB'}; render(); }
 function clearFile(k){ delete S.files[k]; render(); }
 
@@ -373,20 +370,12 @@ function render(keepFocus){
   }
 }
 
-function optGiven(){ return (S.idVals[1]||'').trim() !== ''; }
-
-/* Derived live rather than snapshotted at Next, so returning to step 1 to add the
-   number — or to clear it — is reflected when the agent comes back. A cleared
-   number also drops anything already uploaded against it, otherwise a file would
-   survive with no field to explain it. */
-function syncOptional(){ if(!optGiven()) delete S.files['id1']; }
-
 function goStep(i){
   var target = i===0 ? 1 : (i===2 ? 3 : null);
   if(target===null){ toast(STEPS[i]+' is not part of this prototype'); return; }
-  syncOptional(); S.step = target; window.scrollTo(0,0); render();
+  S.step = target; window.scrollTo(0,0); render();
 }
-function goUpload(){ syncOptional(); S.step = 3; window.scrollTo(0,0); render(); }
+function goUpload(){ S.step = 3; window.scrollTo(0,0); render(); }
 function restart(){ S.step = 1; S.files = {}; window.scrollTo(0,0); render(); }
 
 function toast(msg){
