@@ -75,6 +75,18 @@ h2.sect{font-size:19px;font-weight:600;color:var(--navy);margin:30px 0 20px}
 .hint{font-size:13.5px;color:var(--t-btn);font-weight:500;margin:0 0 6px}
 .f{margin-bottom:18px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:18px 20px}
+/* Address runs one field per row, full width, as in the Agent Portal — only the
+   postal code is short, because a long box for a 8-character value reads wrong. */
+.stack .f{margin-bottom:18px;max-width:100%}
+.stack .f.short{max-width:50%}
+.selfield{position:relative}
+.selfield input{padding-right:40px}
+.selchev{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;
+  display:flex;color:var(--t2)}
+.selchev svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;
+  stroke-linecap:round;stroke-linejoin:round}
+.sect .help{width:15px;height:15px;vertical-align:-2px;margin-left:5px;fill:none;stroke:var(--t3);
+  stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .half{max-width:100%}
 input[type=text]{width:100%;height:44px;border:1px solid var(--bd2);border-radius:8px;padding:0 14px;
   font-family:inherit;font-size:15px;color:var(--t1);background:#fff}
@@ -249,8 +261,15 @@ function personalHTML(){
             '<div class="hint">Mobile phone</div><input type="text" value="PT +351 912 345 678">'+
           '</div>';
 
-  h += '<h2 class="sect">Address</h2>';
-  h += '<div class="two">'+c.address.map(function(a){return field(a[0],a[1]);}).join('')+'</div>';
+  h += '<h2 class="sect">Address'+
+       '<svg class="help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/>'+
+       '<path d="M9.6 9.3a2.5 2.5 0 1 1 3.2 2.6c-.6.2-.8.7-.8 1.3v.4"/>'+
+       '<path d="M12 16.6h.01"/></svg></h2>';
+  h += '<div class="stack">'+c.address.map(function(a,i){
+         /* First slot is the administrative area, a dropdown in the real portal;
+            the last is the postal code, which gets the short box. */
+         return field(a[0], a[1], false, {select:i===0, short:i===c.address.length-1});
+       }).join('')+'</div>';
 
   h += '<h2 class="sect">Identification</h2>';
   h += c.ids.map(function(id,i){
@@ -271,9 +290,12 @@ function personalHTML(){
   return h;
 }
 
-function field(label,val,disabled){
-  return '<div class="f"><div class="hint">'+esc(label)+'</div>'+
-         '<input type="text" value="'+esc(val)+'"'+(disabled?' disabled':'')+'></div>';
+var CHEV = '<span class="selchev"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg></span>';
+function field(label,val,disabled,opt){
+  opt = opt || {};
+  var input = '<input type="text" value="'+esc(val)+'"'+(disabled?' disabled':'')+'>';
+  var body  = opt.select ? '<div class="selfield">'+input+CHEV+'</div>' : input;
+  return '<div class="f'+(opt.short?' short':'')+'"><div class="hint">'+esc(label)+'</div>'+body+'</div>';
 }
 
 /* --- screen 3: Document Upload --------------------------------------------- */
