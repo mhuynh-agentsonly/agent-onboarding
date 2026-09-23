@@ -78,7 +78,7 @@ h2.sect{font-size:19px;font-weight:600;color:var(--navy);margin:30px 0 20px}
 /* Address runs one field per row, full width, as in the Agent Portal — only the
    postal code is short, because a long box for a 8-character value reads wrong. */
 .stack .f{margin-bottom:18px;max-width:100%}
-.stack .f.short{max-width:50%}
+.f.short,.stack .f.short{max-width:380px}
 .selfield{position:relative}
 .selfield input{padding-right:40px}
 .selchev{position:absolute;right:13px;top:50%;transform:translateY(-50%);pointer-events:none;
@@ -275,7 +275,7 @@ function personalHTML(){
   h += c.ids.map(function(id,i){
     var v = S.idVals[i]||'';
     var shown = !!S.shown[i];
-    return '<div class="f" style="max-width:420px">'+
+    return '<div class="f short">'+
       '<div class="hint">'+esc(id.label)+(id.required?'':' (Optional)')+'</div>'+
       '<div class="masked">'+
         '<input type="text" id="id'+i+'" value="'+esc(shown?v:v.replace(/./g,'\u2022'))+'" '+
