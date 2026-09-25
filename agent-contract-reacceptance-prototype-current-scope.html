@@ -121,6 +121,15 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .gitem+.gitem{margin-top:2px}
 .gitem.act{cursor:pointer}
 .gitem.act:hover{background:#eef2f5}
+/* Contract rows only. Amber, not red: this is something to do, not something that has gone
+   wrong — and it is the same amber the gates and the project modal already use, so the agent
+   meets one colour for "a contract is waiting" wherever they run into it. */
+/* Fill and dot only — no border. The base .gitem keeps its 1px transparent border either way,
+   so the row does not shift by a pixel when it changes type. */
+.gitem.ctr{background:#fdf6e4}
+.gitem.ctr.act:hover{background:#fbe6ad}
+.gitem.ctr .dot{border-color:#f79009}
+.gitem.ctr .lbl{color:var(--ink)}
 .gitem .dot{width:16px;height:16px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;
   border:1.8px solid var(--teal);background:#fff;margin-top:2px}
 .gitem .dot svg{width:9px;height:9px;color:#fff}
@@ -332,7 +341,9 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
 .rtbl.mini th{line-height:1.25}
 .nowrap{white-space:nowrap}
 .rname{display:flex;align-items:center;gap:11px;font-weight:500;color:var(--ink)}
-.rav{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;
+/* Renamed from .rav — that is the nav rail's own avatar, and a second definition of it was
+   quietly resizing the one in the rail on every page. */
+.refav{width:32px;height:32px;border-radius:50%;flex:none;display:grid;place-items:center;
   font-size:11.5px;font-weight:700;color:var(--ink2)}
 .rmail{word-break:break-word;font-weight:400}
 .kb{border:0;background:transparent;color:var(--ink3);padding:2px;display:grid;place-items:center}
@@ -883,6 +894,36 @@ body.sched .main::before{content:'';position:absolute;left:0;top:0;bottom:0;widt
 .toast svg{width:16px;height:16px;color:#4ade9b;flex-shrink:0}
 @keyframes tin{from{opacity:0;transform:translateY(9px)}}
 
+/* ---------- contract details & execution page (project contracts) ----------
+   One template for every project contract, whatever its fields are called. The contract's own
+   pages go in untouched; this page is added after them and fills in their blanks. */
+.paperpg .blank{display:inline-block;min-width:96px;border-bottom:1px solid #1d2b3d;height:1em;vertical-align:-3px}
+.osig{margin-top:34px;display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.osig>div{border-top:1px solid #1d2b3d;padding-top:7px;font-size:10.8px;line-height:1.55;color:#4a5a71}
+.osig .nm{display:block;min-height:28px;margin-top:-34px;margin-bottom:6px;
+  font-family:'Segoe Script','Brush Script MT','Snell Roundhand',cursive;font-size:20px;color:#14273d}
+.xp .xphead{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;
+  border-bottom:1.5px solid #14273d;padding-bottom:10px;margin-bottom:14px}
+.xp .xphead b{display:block;font-size:10px;letter-spacing:.09em;color:#14273d}
+.xp .xphead h6{margin:4px 0 0;font-size:15px;font-weight:700;color:#14273d;letter-spacing:-.005em}
+.xp .xphead span{font-size:10px;color:#7c8a9c;text-align:right;line-height:1.5}
+.xp .xpterms{background:#f7f9fb;border:1px solid #e8eef1;border-radius:4px;padding:10px 12px;margin-bottom:6px}
+.xp .xpterms p{font-size:10.4px;line-height:1.55;margin:0 0 6px}
+.xp .xpterms p:last-child{margin:0}
+.xp .xps{font-size:11px;font-weight:700;color:#14273d;margin:14px 0 3px}
+.xp table{width:100%;border-collapse:collapse;font-size:10.9px}
+.xp td{padding:5px 0;border-bottom:1px solid #eef2f5;vertical-align:top;color:#1d2b3d}
+.xp td:first-child{width:36%;color:#5b6b80;padding-right:12px}
+.xp .xpsig{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:5px}
+.xp .sigc{border:1px solid #dbe4ea;border-radius:4px;padding:10px 12px;font-size:10.3px;line-height:1.6;color:#4a5a71}
+.xp .sigc .who{font-size:9.5px;font-weight:700;letter-spacing:.09em;color:#7c8a9c}
+.xp .sigc .nm{font-family:'Segoe Script','Brush Script MT','Snell Roundhand',cursive;font-size:19px;
+  color:#14273d;line-height:1.35;margin:2px 0 1px}
+.xp .sigc .es{color:var(--teal-ink);font-weight:700}
+.xp .xpfoot{margin-top:14px;padding-top:8px;border-top:1px solid #e8eef1;font-size:9.6px;color:#7c8a9c;line-height:1.65}
+.xp .xpfoot code{font-family:ui-monospace,Menlo,monospace;font-size:9.3px;color:#4a5a71}
+
+
 /* ---------- prototype controls: one low pill strip, out of the way ---------- */
 /* Single row, always. Wrapping turned the pill into a blob, so it scrolls instead. */
 /* Above the platform gate. The strip is not part of the product — it is the control panel for
@@ -955,7 +996,8 @@ const S = {
   docPage:1, docKey:'rv-sow', docVersion:null, signName:'', signChk:false,
   viewKey:null, viewPage:1, walPage:1, schProj:null,
   workProject:null, taskOpen:false,
-  guideCol:false, openProject:null
+  guideCol:false, openProject:null,
+  country:'my'   // agent's country — drives the execution page and the contract wording
 };
 
 /* Legal documents do not expire, and there is no grace period. An unsigned contract is a
@@ -994,7 +1036,10 @@ let PROJECTDOCS = [
    effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
   {id:'im-tou', project:'Image Moderation',  title:'Terms of Use', version:1,
    effective:'2025-03-04', pages:3, signed:true, signedOn:'2025-03-06', previous:[]},
-  {id:'pz-nda', project:'Large Pizza Project', title:'Project NDA', version:1,
+  /* LEGACY. Signed before the execution page shipped, so its signed copy is the original
+     document only — no page N+1, no Contract details button. Existing signatures are not
+     re-papered. */
+  {id:'pz-nda', project:'Large Pizza Project', title:'Project NDA', version:1, legacy:true,
    effective:'2024-11-18', pages:3, signed:true, signedOn:'2024-11-20', previous:[]},
   {id:'pz-sow', project:'Large Pizza Project', title:'Statement of Work', version:1,
    effective:'2024-11-18', pages:4, signed:true, signedOn:'2024-11-20', previous:[]},
@@ -1091,14 +1136,15 @@ const PENDING = [
   {id:'q1', name:'Technical Support Tier 1',                    type:'Inbound',  stars:4.0, exp:'<3 years'},
   {id:'q2', name:'Appointment Setting for Dental Group',         type:'Outbound', stars:3.7, exp:'<3 years'}
 ];
+/* Each is a one-page document, so its execution page is page 2 of 2. */
 const DOCS = {
-  sow:{title:'Statement of Work', scope:'project', project:'RV Rental Platform',
+  sow:{title:'Statement of Work', scope:'project', project:'RV Rental Platform', pages:1,
        body:`<h5>Statement of Work — RV Rental Platform</h5>
        <p>This Statement of Work describes the services to be delivered under the RV Rental Platform project and supplements any agreement already in force between the parties.</p>
        <b class="cl">Scope</b><p>Inbound customer support for rental bookings, cancellations and damage claims, delivered during the scheduled shifts the Contractor books through the platform.</p>
        <b class="cl">Service levels</b><p>Contractor will maintain an average handling quality score of 3.5 or above across any rolling thirty-day period.</p>
        <b class="cl">Client-specific tooling</b><p>Contractor agrees to complete the client's booking-system training module before taking live contacts.</p>`},
-  nda:{title:'Project NDA', scope:'project', project:'RV Rental Platform',
+  nda:{pages:1, title:'Project NDA', scope:'project', project:'RV Rental Platform',
        body:`<h5>Project Non-Disclosure Agreement</h5>
        <p>This Agreement applies to confidential information disclosed in connection with the RV Rental Platform project only.</p>
        <b class="cl">1. Confidential information</b><p>Includes customer records, booking data, pricing, and any material marked confidential or that a reasonable person would understand to be confidential.</p>
@@ -1118,7 +1164,7 @@ function projectDocItems(){
      are blocked from a project. "Sign … again" carries the same meaning, cannot be misread,
      and is simpler English besides. It is never split across a line break here because the
      row truncates rather than wraps. */
-  if(due.length===1) return [{done:false,
+  if(due.length===1) return [{done:false, contract:true,
     lbl: isResign(due[0])
       ? 'Sign '+due[0].title+' again — '+due[0].project
       : 'Sign '+due[0].title+' — '+due[0].project,
@@ -1129,12 +1175,12 @@ function projectDocItems(){
   /* Only say "again" when every outstanding contract is a renewal. Mixed goes back to the
      plain wording, because "again" would be wrong for half the list. */
   const allAgain = due.every(isResign);
-  if(projects.length===1) return [{done:false,
+  if(projects.length===1) return [{done:false, contract:true,
     lbl:'Sign '+due.length+' project contracts'+(allAgain?' again':'')+' in '+projects[0],
     /* The widget is a reminder, so it lands where contracts live rather than dropping the
        agent into a project they may not have been heading for. */
     act:"go('legal')"}];
-  return [{done:false,
+  return [{done:false, contract:true,
     lbl:'Sign '+due.length+' project contracts'+(allAgain?' again':'')
         +' across '+projects.length+' projects',
     act:"go('legal')"}];
@@ -1170,7 +1216,11 @@ function guideHTML(){
     <div class="glist">
       ${items.map(i=>{
         const tag = i.act ? 'button' : 'div';
-        const cls = ['gitem', i.done&&'done', i.act&&'act'].filter(Boolean).join(' ');
+        /* A contract is the only row here that blocks something. Onboarding steps are things
+           the agent still has to get round to; a contract is a door already shut. Colouring
+           only the contract keeps that difference legible — colouring everything would just be
+           a louder list. */
+        const cls = ['gitem', i.done&&'done', i.act&&'act', i.contract&&'ctr'].filter(Boolean).join(' ');
         return `<${tag} class="${cls}"${i.act?` type="button" onclick="${i.act}"`:''}>
           <span class="dot">${i.done?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':''}</span>
           <span class="gtxt"><span class="lbl">${i.lbl}</span>
@@ -1350,6 +1400,148 @@ function legalHTML(){
 function versionRows(d){ return ''; }
 
 /* ============================================================
+   CONTRACT DETAILS & EXECUTION PAGE  (project contracts only)
+   ============================================================
+   Project contracts arrive as the client's own document, and every one names and formats its
+   blanks differently ("______", "[Name]", "[**]", "RM___ per [measure]"). Rather than map each
+   field, the agent signs the document as it is and the platform adds ONE page after it: every
+   value the blanks need, the signature, and the date and time. A 4-page contract becomes 5.
+
+   The page exists only once the contract is signed (MVP, as approved). Before that the agent
+   sees the contract as uploaded, blanks included; there is no preview and no review step.
+
+   The demo agent is one person; the Country control swaps their profile and the wording of the
+   blanks on page 1, using the Vietnam, Malaysia and Spain project agreements as the models. */
+const AGENT_NAME = 'Olivia O.J Rhye';
+const AGENT_EMAIL = 'olivia.rhye@example.com';
+const SIGN_UTC = '06:32:08';        // one time of day for every demo signature
+/* One company record for every country. The Vietnam agreement still prints 2900 - 550 Burrard
+   Street; this page would override it — flagged for legal. */
+const COMPANY = {name:'Agents Only Technologies, Inc.', reg:'BC1238861',
+  addr:'Suite 201, 128 W Pender St W, Vancouver, BC V6B 1R8, Canada', signatory:'Michael Cole, CEO'};
+/* Only fields a contract actually leaves blank get a row — so Vietnam asks for entity type,
+   Malaysia for NRIC, Spain for the arbitration seat, and nobody sees an empty row. */
+const COUNTRIES = {
+  vn:{name:'Vietnam', tz:7, tzLabel:'UTC+07:00', entity:'Individual',
+      address:'45 Nguyen Hue, Ben Nghe Ward, District 1, Ho Chi Minh City 700000, Vietnam',
+      fee:'Per-Minute Pay: VND 1,500 per active minute'},
+  my:{name:'Malaysia', tz:8, tzLabel:'UTC+08:00',
+      address:'12 Jalan Bukit Bintang, 55100 Kuala Lumpur, Malaysia',
+      id:{label:'NRIC No.', value:'••••••-••-5678'},
+      fee:'RM 18.00 per hour'},
+  es:{name:'Spain', tz:2, tzLabel:'UTC+02:00',
+      address:'Calle de Alcalá 42, 3º B, 28014 Madrid, Spain',
+      fee:'$12.00 (USD) per hour',
+      seat:'Madrid, Community of Madrid, Spain'}
+};
+const ctry = () => COUNTRIES[S.country] || COUNTRIES.my;
+/* A fee blank belongs to the engagement documents, not to an NDA or a data addendum. */
+const hasFee = c => /Statement of Work|Contractor Agreement|Consulting Agreement/.test(c.title);
+const docTotal = (c, signed) => c.pages + (c.project && !c.legacy && signed ? 1 : 0);
+
+function sigStamp(iso){
+  const k = ctry();
+  const u = new Date(iso+'T'+SIGN_UTC+'Z'), l = new Date(u.getTime()+k.tz*3600000);
+  const f = d => fmt(d.toISOString().slice(0,10))+', '+d.toISOString().slice(11,19);
+  return {utc:f(u), local:f(l)+' ('+k.tzLabel+')', localDate:fmt(l.toISOString().slice(0,10))};
+}
+function fakeHash(str){
+  let h = 0x811c9dc5, out = '';
+  for(let r=0;r<8;r++){ for(const ch of str+'|'+r){ h ^= ch.charCodeAt(0); h = Math.imul(h,16777619)>>>0; }
+    out += h.toString(16).padStart(8,'0'); }
+  return out;
+}
+/* [label, value, note]. A null value is a field the platform does not have yet. */
+function execRows(c, signed){
+  const k = ctry();
+  return [
+    {h:'Agreement details', rows:[
+      ['Agreement', c.title], ['Project', c.project], ['Country', k.name],
+      ['Effective date', sigStamp(signed).localDate+' ('+k.tzLabel+')'],
+      k.seat && ['Arbitration & governing law', k.seat]]},
+    {h:'Contractor details', rows:[
+      ['Contractor name', AGENT_NAME],
+      k.entity && ['Entity type', k.entity],
+      ['Address', k.address],   // mandatory at onboarding, so always on file
+      ['Email', AGENT_EMAIL],
+      k.id && [k.id.label, k.id.value]]},
+    {h:'Company details', rows:[
+      ['Company', COMPANY.name], ['Company registration no.', COMPANY.reg],
+      ['Company address', COMPANY.addr], ['Company signatory', COMPANY.signatory]]}
+  ].map(sec=>({h:sec.h, rows:sec.rows.filter(Boolean)}));
+}
+/* The page itself. Generated at the moment of signing, so it is always a signed record — and
+   the page Settings → Legal's "Contract details" button opens on. */
+function execPage(c, signed){
+  const n = c.pages+1, t = sigStamp(signed);
+  const id = 'AO-'+c.key.toUpperCase().replace(/-/g,'')+'-'+signed.replace(/-/g,'');
+  const h = fakeHash(id+S.country);
+  const sig = (who, name, extra) => `<div class="sigc"><div class="who">${who}</div>
+      <div class="nm">${esc(name)}</div>
+      <span class="es">&#10003; Electronically signed</span><br>
+      ${extra}</div>`;
+  return `<div class="xp">
+    <div class="xphead"><div><b>AGENTS ONLY TECHNOLOGIES, INC.</b><h6>Contract Details &amp; Execution</h6></div>
+      <span>Execution page appended to the Agreement<br>Page ${n} of ${n}</span></div>
+    <div class="xpterms">
+      <p><b>Defined terms.</b> “Agreement” means the agreement identified in Section 1, including its appendices,
+        to which this page is attached. “Contractor” means the party referred to in the Agreement as “Contributor”,
+        “Contractor” or “Independent Contractor”. “Company” means Agents Only Technologies, Inc., referred to in
+        the Agreement as “Company” or “Agents Only”.</p>
+      <p><b>Effect of this page.</b> This page forms part of the Agreement. The details in Sections 1 to 3 complete
+        any blank, bracketed or placeholder field in the Agreement and prevail if there is any inconsistency. By
+        signing in Section 4, the Contractor confirms that these details are accurate and agrees to be bound by the
+        Agreement.</p>
+    </div>
+    ${execRows(c, signed).map((sec,i)=>`<div class="xps">${i+1}. ${sec.h}</div><table>${sec.rows.map(([l,v])=>
+      `<tr><td>${esc(l)}</td><td>${esc(v)}</td></tr>`).join('')}</table>`).join('')}
+    <div class="xps">4. Execution</div>
+    <div class="xpsig">
+      ${sig('CONTRACTOR', AGENT_NAME, `Signed (UTC): ${t.utc}<br>Signed (local): ${t.local}`)}
+      ${sig('COMPANY', 'Michael Cole', `Name and title: ${COMPANY.signatory}<br>Signed (UTC): ${t.utc}`)}
+    </div>
+    <div class="xpfoot">The Contractor signed the Agreement on page ${c.pages} of ${c.pages}. This page is page ${n} of ${n}
+      and forms part of the signed document.<br>
+      Document ID <code>${id}</code> · SHA-256 <code>${h.slice(0,10)}…${h.slice(-10)}</code> · IP 203.0.113.24 · Email verified</div>
+  </div>`;
+}
+/* The opening of each country's agreement, blanks and all. The contract's own pages are never
+   filled in — that is the point — and page N+1, added on signing, completes them. */
+function partiesPara(c){
+  const B = '<span class="blank"></span>', t = esc(c.title);
+  if(S.country==='vn') return `<p>This ${t} (the “Agreement”) is entered into and effective as of ${B} (the
+    “Effective Date”) between AGENTS ONLY TECHNOLOGIES INC. (“Agents Only”) and ${B}, [an individual/ a
+    corporation] having a residential/registered address at ${B} (the “Contractor”).</p>`;
+  if(S.country==='es') return `<p>Agents Only Technologies, Inc. (“Company”) and ${B} (“Contributor”), together the
+    “Parties”, enter into this ${t} (the “Agreement”), dated ${B} (the “Effective Date”).</p>`;
+  return `<p>This ${t} (“Agreement”) is made on ${B} (“Effective Date”) between Agents Only Technologies
+    [Company No.: [**]] (“Company”) and [Name] [NRIC No. [**]], a Malaysian citizen of [address] (“Contributor”).</p>`;
+}
+/* The fee is a company-side blank: the client or Ops fills it in the document before upload, so
+   it arrives already written into the contract and is NOT on the execution page. That page
+   carries agent data only. */
+function feeClause(){
+  if(S.country==='vn') return 'Contractor will be paid under one or more of the payment models in Appendix B, depending on the project opted.';
+  if(S.country==='es') return 'Contributor shall be paid a fee of $12.00 (USD) per hour for the Services (the “Fee”).';
+  return 'The Contributor shall be paid a fee of RM 18.00 per hour for the Services.';
+}
+/* The contract's own signature line, on its own last page — current behaviour, unchanged. */
+function origSig(signed){
+  return `<div class="osig">
+    <div><span class="nm">${signed?AGENT_NAME:''}</span>Contractor · ${AGENT_NAME}<br>
+      ${signed?'Electronically signed '+fmt(signed):'Signature applied when you submit'}</div>
+    <div><span class="nm">${signed?'Michael Cole':''}</span>Agents Only Technologies, Inc.<br>
+      ${signed?'Electronically signed '+fmt(signed):'Authorised signatory'}</div>
+  </div>`;
+}
+/* The signed-contract viewer is an overlay, which render() does not touch — redraw it too, or
+   the page on screen keeps the previous country's details. */
+function setCountry(v){
+  S.country=v; refresh();
+  if(S.viewKey && document.querySelector('#overlay .viewer[data-v="signed"]')) drawSignedDoc();
+}
+
+/* ============================================================
    DOCUMENT VIEW — sign, and later review, in the place the doc lives
    ============================================================ */
 const DOC_PAGES = 13;
@@ -1364,6 +1556,7 @@ function docStamp(c, info){
 }
 /* Project documents are short. Same frame, same signing block, less paper. */
 function projectPaper(n, info, c){
+  if(!c.platform && !c.legacy && info.signed && n===c.pages+1) return execPage(c, info.signed);
   const stamp = docStamp(c, info);
   const revised = info.current && c.previous && c.previous.length;
   const head = `<div class="aologo"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
@@ -1387,7 +1580,7 @@ function projectPaper(n, info, c){
     <p class="cl">4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;INCIDENTS</p>
     <p class="ind">Contractor will report any suspected breach to the Company without undue delay and
       in any event within twenty-four (24) hours of becoming aware of it.</p>`;
-  if(n===1) return head + `
+  if(n===1) return head + partiesPara(c) + `
     <p>This contract is issued by the client for the <b>${esc(c.project)}</b> project and applies only to work
       performed on that project. It supplements, and does not replace, the Independent Contractor Agreement.</p>
     <p class="cl">1.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SCOPE</p>
@@ -1400,10 +1593,12 @@ function projectPaper(n, info, c){
       rolling thirty-day period.</p>
     <p class="cl">3.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CONFIDENTIALITY</p>
     <p class="ind">Contractor will not disclose client data, materials or pricing encountered on this project, and
-      will return or destroy such materials on request.</p>`;
+      will return or destroy such materials on request.</p>
+    ${hasFee(c)?`<p class="cl">4.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FEE</p><p class="ind">${feeClause()}</p>`:''}`;
   return head + `
     <p class="cl">${n+2}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FURTHER TERMS</p>
     <p class="ind">Placeholder text standing in for the remaining clauses of this document.</p>
+    ${!c.platform && n===c.pages ? origSig(info.signed) : ''}
     <p style="text-align:center;color:#9aa8b8;margin-top:40px">— ${stamp?stamp+' · ':''}Page ${n} of ${c.pages} —</p>`;
 }
 /* Which version's terms are on screen. Previous versions really do differ — that is the
@@ -1418,6 +1613,7 @@ function docCtx(key){
     /* `lastSigned` survives an expiry — the signature that ran out is what the renewal notice
        is about, so it cannot be cleared when the document goes back to unsigned. */
     resign:isResign(d), country:d.country, renewMonths:d.renewMonths, lastSigned:d.signedOn,
+    legacy:!!d.legacy,
     signedOn: d.signed ? (d.signedOn || addDays(TODAY,0)) : null};
 }
 function verInfo(v){
@@ -1429,7 +1625,7 @@ function verInfo(v){
 }
 function paperPage(n, ver){ return projectPaper(n, verInfo(ver), docCtx()); }
 function docPager(){
-  const p=S.docPage, last=docCtx().pages;
+  const p=S.docPage, dc=docCtx(), last=docTotal(dc, dc.signedOn && !S.docVersion);
   let nums=[];
   if(last<=7) nums=Array.from({length:last},(_,i)=>i+1);
   else if(p<=5) nums=[1,2,3,4,5,'…',last];
@@ -1517,12 +1713,13 @@ function openSignedDoc(key){ S.viewKey=key; S.viewPage=1; drawSignedDoc(); }
 function drawSignedDoc(){
   const c = docCtx(S.viewKey);
   const info = {v:c.version, effective:c.effective, signed:c.signedOn, current:true};
-  const last = c.pages, p = S.viewPage;
-  return scrim(`<div class="viewer">
+  const last = docTotal(c, c.signedOn), p = S.viewPage;
+  return scrim(`<div class="viewer" data-v="signed">
     <div class="vhead">
       <button class="x" style="position:static" onclick="closeScrim()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
       <span class="vt">${esc(c.title)}</span>
+      ${c.project && !c.legacy?`<button class="btn sm" onclick="S.viewPage=${last};drawSignedDoc()">Contract details</button>`:''}
       <button class="btn pri sm" onclick="downloadDoc()">Download</button>
     </div>
     <div class="vpaper">
@@ -1549,6 +1746,8 @@ function submitSign(){
   const c=docCtx();
   const wasResign=c.resign;
   const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0);
+  /* Land on the page that was just added, so the agent sees their signed details. */
+  if(!c.platform) S.docPage = c.pages+1;
   render();
   /* A renewal is worth confirming as a renewal: the agent knows they signed this before, so
      "signed" alone leaves them wondering whether the right thing happened. */
@@ -1700,9 +1899,14 @@ function drawProject(){
    DOC VIEWER + SIGN DIALOG  (one component, every document)
    ============================================================ */
 let AFTER_SIGN = null;
+/* The apply flow signs against the project being applied to, not the one baked into DOCS. */
+function applyCtx(key){
+  const d = DOCS[key], p = AVAIL.find(x=>x.id===S.openProject);
+  return {key:'ap-'+key, title:d.title, project:p?p.name:d.project, pages:d.pages||1, platform:false};
+}
 function openDoc(key, after){
   AFTER_SIGN = after || null;
-  const d = DOCS[key];
+  const d = DOCS[key], c = applyCtx(key);
   scrim(`<div class="viewer">
     <div class="vhead">
       <button class="x" style="position:static" onclick="backFromDoc()" aria-label="Close">
@@ -1710,7 +1914,10 @@ function openDoc(key, after){
       <span class="vt">${esc(d.title)}</span>
       <button class="btn pri sm" onclick="signDialog('${key}')">Sign &amp; Continue</button>
     </div>
-    <div class="vpaper"><div class="paper">${d.body}</div></div>
+    <div class="vpaper"><div class="paper">${d.body}
+        ${origSig(null)}
+        <p style="text-align:center;color:#9aa8b8;margin:30px 0 0">— Page 1 of ${c.pages} —</p></div>
+    </div>
   </div>`);
 }
 function backFromDoc(){
@@ -1747,7 +1954,7 @@ function doSign(key){
   if(c && !c.checked) return;
   S.docs[key] = true;
   render();
-  toast(DOCS[key].title+' signed.');
+  toast(DOCS[key].title+' signed. Contract details added as page '+(applyCtx(key).pages+1)+'.');
   drawProjectDocs();
 }
 
@@ -2237,7 +2444,7 @@ const AVCOL = ['#dff0ea','#e6edfb','#fbeadf','#ece7fa','#ddeef6','#fbe8ef'];
 const initials = n => n.split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase();
 /* An invited email has no name yet, so its initials come from the invitee record rather than
    from the address — deriving them from "itsjennie@..." would just print II. */
-const avatar = (n, init) => `<span class="rav" style="background:${AVCOL[n.length % AVCOL.length]}">${init || initials(n)}</span>`;
+const avatar = (n, init) => `<span class="refav" style="background:${AVCOL[n.length % AVCOL.length]}">${init || initials(n)}</span>`;
 
 const L1 = [
   ['Maria Ambong',10,'3.5','$20.00'],   ['Catherine Hiddlestone',120,'4.5','$20.00'],
@@ -2390,7 +2597,7 @@ function submitWork(){
 }
 
 /* ============================================================
-   APPLY → project documents (the legacy flow, untouched)
+   APPLY → project documents (execution page added on signing, as everywhere else)
    ============================================================ */
 function applyNow(){ drawProjectDocs(); }
 function drawProjectDocs(){
@@ -2578,10 +2785,11 @@ function gateContent(){
 function contractCard(d, fromList){
   const platform = !d.project;
   const done  = !!d.signed;                  // already accepted this round — read-only
-  const ready = S.gateName.trim() && S.gateChk;
-  const info = {v:d.version, effective:d.effective, signed:null, current:true};
+  const info = {v:d.version, effective:d.effective, signed:done?d.signedOn:null, current:true};
   const c = {key:d.id, title:d.title, project:d.project, platform, version:d.version,
              effective:d.effective, previous:d.previous, pages:d.pages, signedOn:null};
+  const ready = S.gateName.trim() && S.gateChk;
+  const total = docTotal(c, done);
   return `<div class="gatehead">
       <h3>${esc(d.title)}${platform?' V'+d.version:''}</h3>
       ${/* No explainer on the platform card. The scrim behind it already shows the portal is
@@ -2607,9 +2815,9 @@ function contractCard(d, fromList){
       <div class="pager">
         <button class="pgb" ${S.gatePage===1?'disabled':''} onclick="S.gatePage=${S.gatePage-1};render()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
-        ${Array.from({length:d.pages},(_,i)=>i+1).map(n=>
+        ${Array.from({length:total},(_,i)=>i+1).map(n=>
           `<button class="pgn ${n===S.gatePage?'on':''}" onclick="S.gatePage=${n};render()">${n}</button>`).join('')}
-        <button class="pgb" ${S.gatePage===d.pages?'disabled':''} onclick="S.gatePage=${S.gatePage+1};render()">Next
+        <button class="pgb" ${S.gatePage===total?'disabled':''} onclick="S.gatePage=${S.gatePage+1};render()">Next
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
       </div>
       <div class="sigsec">
@@ -2657,7 +2865,8 @@ function acceptGate(){
   S.gatePick=null; S.gateList=false; S.gateName=''; S.gateChk=false; S.gatePage=1;
   render();
   /* Say where it went — the gate replaced the trip through Settings that used to teach this. */
-  toast('Signed. You can read it any time in Settings → Legal.');
+  toast(d.project ? 'Signed. Your copy, with its contract details page, is in Settings → Legal.'
+                   : 'Signed. You can read it any time in Settings → Legal.');
 }
 /* Signing a project contract happens in that project's dashboard, because that is the thing
    being unblocked. */
@@ -2738,6 +2947,9 @@ function stripHTML(){
     <span class="segwrap">${[['none','None'],['p1','1'],['same','2 in one'],['two','2 in two'],
                              ['renew','Renewal due']].map(([k,l])=>
       `<button class="sb ${S.due===k?'on':''}" onclick="setDue('${k}')">${l}</button>`).join('')}</span>
+    <span class="sl">Agent country</span>
+    <span class="segwrap">${[['vn','Vietnam'],['my','Malaysia'],['es','Spain']].map(([k,l])=>
+      `<button class="sb ${S.country===k?'on':''}" onclick="setCountry('${k}')">${l}</button>`).join('')}</span>
     <button class="pb ${S.bankTax?'':'act'}" onclick="toggleBankTax()">Bank &amp; tax: ${S.bankTax?'filled':'missing'}</button>
     <button class="pb" onclick="resetAll()">Reset</button>
   </div>`;
