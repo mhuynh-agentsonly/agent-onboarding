@@ -752,9 +752,9 @@ body.sched .main::before{content:'';position:absolute;left:0;top:0;bottom:0;widt
 
 /* ---------- modals ---------- */
 .scrim{position:fixed;inset:0;background:rgba(22,38,60,.52);z-index:100;display:grid;place-items:center;
-  padding:28px;overflow:auto}
+  padding:28px 28px 84px;overflow:auto}  /* bottom clears the control strip */
 .modal{background:#fff;border-radius:20px;box-shadow:var(--sh-lg);width:min(830px,100%);
-  max-height:88vh;display:flex;flex-direction:column;overflow:hidden}
+  max-height:calc(100vh - 112px);display:flex;flex-direction:column;overflow:hidden}
 .mhead{padding:26px 30px 0;position:relative;flex-shrink:0}
 .mhead h3{margin:0;font-size:20px;font-weight:700;letter-spacing:-.015em;padding-right:44px}
 .x{position:absolute;right:20px;top:20px;width:28px;height:28px;border-radius:50%;border:1px solid var(--line2);
@@ -840,6 +840,52 @@ body.sched .main::before{content:'';position:absolute;left:0;top:0;bottom:0;widt
 .vpaper{flex:1;overflow:auto;background:#eef2f5;padding:26px}
 .vdoc{max-width:660px;margin:0 auto;box-shadow:var(--sh-md)}
 .vpager{margin:22px 0 4px}
+/* ---------- sign modal (project contracts): full-width dark bar + one white card ----------
+   Matches the design: the bar spans the viewport, the card hangs directly under it and holds the
+   paper (scrolling on its own), the pager and the signature, so everything to do is in one place. */
+.fullview{position:fixed;inset:0;display:flex;flex-direction:column;cursor:default}
+.fvbar{flex-shrink:0;height:60px;background:rgba(52,64,84,.94);color:#fff;display:flex;align-items:center;
+  gap:14px;padding:0 20px}
+.fvbar .x{position:static;background:transparent;border:1.5px solid rgba(255,255,255,.85);color:#fff}
+.fvbar .x:hover{background:rgba(255,255,255,.12);border-color:#fff;color:#fff}
+/* Secondary action on the dark bar: a white pill, as in the design. */
+.fvbar .btn:not(.pri){background:#fff;border-color:transparent;color:var(--ink)}
+.fvbar .btn:not(.pri):hover{background:#eef3f6}
+.fvbar .vt{flex:1;text-align:center;font-size:16px;font-weight:600;letter-spacing:-.005em}
+/* Opaque pastel of the same ramp, so it reads as "not yet" against the dark bar instead of
+   blending into it the way a translucent gradient does. */
+.fvbar .btn.pri:disabled{background:linear-gradient(99deg,#b4e1d4 29.48%,#bfcde9 133.95%);
+  color:#fff;box-shadow:none;filter:none}
+/* Bottom padding clears the prototype control strip (fixed, ~58px incl. its offset), so the pager
+   and the signature are never hidden behind it. */
+.fvbody{flex:1;overflow:auto;display:flex;justify-content:center;padding:24px 20px 84px}
+.fvcard{background:#fff;width:min(760px,100%);align-self:flex-start;padding:10px 12px 26px;
+  box-shadow:var(--sh-lg);border-radius:8px}
+.fvpaper{border:1px solid #e4eaef;border-radius:2px;height:min(52vh,560px);overflow:auto;padding:8px;background:#fdfefe}
+.fvpaper .paperpg{min-height:0}
+.fvpaper .paperpg h5{text-transform:uppercase;border-bottom:1.5px solid #2b3a4e;padding-bottom:7px;margin-bottom:14px}
+.fvpaper .paperpg b.cl{display:block;margin:15px 0 4px;font-size:12px}
+.fvcard .vpager{margin:18px 0 0}
+/* Download modal: nothing sits under the pager, so the card fills the height below the bar and the
+   paper takes whatever is left, instead of stopping at the sign modal's fixed height. */
+.fullview[data-v="signed"] .fvcard{align-self:stretch;display:flex;flex-direction:column;padding-bottom:18px}
+.fullview[data-v="signed"] .fvpaper{flex:1;height:auto;min-height:260px}
+.fullview[data-v="signed"] .vpager{flex-shrink:0}
+.fvcard .vnote{margin:6px 6px 12px;max-width:none}
+.fvsig{padding:26px 36px 0}
+.fvsig h3{font-size:15px;font-weight:600;margin:0 0 14px}
+.fvsig .fld label{font-size:13px;margin-bottom:6px}
+.fvsig .fld input{padding:11px 13px;font-size:14.5px}
+.fvsig .chkrow{margin-top:14px;font-size:13.5px}
+.fvsig .chkrow input{width:15px;height:15px;margin-top:2px}
+@media (max-width:640px){.fvbar{padding:0 12px}.fvbody{padding:16px 0 76px}.fvsig{padding:22px 14px 0}}
+
+/* Signature block inside the signing viewer: sits under the paper, same width, on white. */
+.vsig{max-width:660px;margin:22px auto 4px;background:#fff;border-radius:12px;padding:22px 26px 24px;
+  box-shadow:var(--sh-md)}
+.vsig h3{font-size:16px;font-weight:600;margin:0 0 14px}
+.vsig .chkrow{margin-top:16px;font-size:14.5px}
+.vnote{max-width:660px;margin:0 auto 18px}
 .paper{background:#fff;max-width:660px;margin:0 auto;padding:44px 52px;box-shadow:var(--sh-md);
   font-size:12.5px;line-height:1.65;color:#2b3a4e}
 .paper h5{margin:0 0 14px;font-size:14px;text-align:center;text-transform:uppercase;letter-spacing:.04em;
@@ -873,9 +919,9 @@ body.sched .main::before{content:'';position:absolute;left:0;top:0;bottom:0;widt
 .gateinline .gatehead{padding-top:24px}
 .gatescrim{position:fixed;inset:0;z-index:400;background:rgba(224,235,240,.74);
   -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
-  display:grid;place-items:center;padding:26px;overflow:auto}
+  display:grid;place-items:center;padding:26px 26px 84px;overflow:auto}  /* bottom clears the control strip */
 .gatemodal{background:#fff;border-radius:20px;box-shadow:var(--sh-lg);width:min(880px,100%);
-  max-height:92vh;display:flex;flex-direction:column;overflow:hidden}
+  max-height:calc(100vh - 110px);display:flex;flex-direction:column;overflow:hidden}
 .gatehead{padding:24px 30px 0;flex-shrink:0}
 .gatehead h3{margin:0 0 7px;font-size:20px;font-weight:700;letter-spacing:-.015em;
   display:flex;align-items:center;gap:11px;flex-wrap:wrap}
@@ -1538,7 +1584,7 @@ function origSig(signed){
    the page on screen keeps the previous country's details. */
 function setCountry(v){
   S.country=v; refresh();
-  if(S.viewKey && document.querySelector('#overlay .viewer[data-v="signed"]')) drawSignedDoc();
+  if(S.viewKey && document.querySelector('#overlay [data-v="signed"]')) drawSignedDoc();
 }
 
 /* ============================================================
@@ -1699,6 +1745,10 @@ function syncSign(){
   if(b) b.disabled = !(S.signName.trim() && S.signChk);
 }
 function openLegalDoc(key, v){
+  /* Unsigned project contracts sign in a modal over Settings → Legal — every entry point
+     (Legal rows, reminders, the project modal) lands there. Platform contracts keep the page. */
+  const pd = PROJECTDOCS.find(x=>x.id===key);
+  if(pd && !pd.signed){ S.view='legal'; closeAcct(); closeScrim(); render(); return openSignModal(key); }
   S.view='doc'; S.docKey = key || 'rv-sow'; S.docPage=1; S.docVersion = v || null;
   S.signName=''; S.signChk=false;
   closeAcct(); closeScrim(); render();
@@ -1714,16 +1764,17 @@ function drawSignedDoc(){
   const c = docCtx(S.viewKey);
   const info = {v:c.version, effective:c.effective, signed:c.signedOn, current:true};
   const last = docTotal(c, c.signedOn), p = S.viewPage;
-  return scrim(`<div class="viewer" data-v="signed">
-    <div class="vhead">
-      <button class="x" style="position:static" onclick="closeScrim()" aria-label="Close">
+  /* Same shell as the sign modal: dark bar, one white card. */
+  return scrim(`<div class="fullview" data-v="signed">
+    <div class="fvbar">
+      <button class="x" onclick="closeScrim()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
       <span class="vt">${esc(c.title)}</span>
       ${c.project && !c.legacy?`<button class="btn sm" onclick="S.viewPage=${last};drawSignedDoc()">Contract details</button>`:''}
       <button class="btn pri sm" onclick="downloadDoc()">Download</button>
     </div>
-    <div class="vpaper">
-      <div class="vdoc"><div class="paperpg">${projectPaper(p, info, c)}</div></div>
+    <div class="fvbody"><div class="fvcard">
+      <div class="fvpaper"><div class="paperpg">${projectPaper(p, info, c)}</div></div>
       <div class="pager vpager">
         <button class="pgb" ${p===1?'disabled':''} onclick="S.viewPage=${p-1};drawSignedDoc()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
@@ -1732,7 +1783,7 @@ function drawSignedDoc(){
         <button class="pgb" ${p===last?'disabled':''} onclick="S.viewPage=${p+1};drawSignedDoc()">Next
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
       </div>
-    </div>
+    </div></div>
   </div>`);
 }
 /* Name what landed on their machine. "Downloaded" alone leaves the agent checking. */
@@ -1741,11 +1792,60 @@ function downloadDoc(){
   toast('Successfully downloaded '+(c.project ? esc(c.project)+"'s "+esc(c.title) : esc(c.title))+'.');
 }
 
+/* ---------- Sign modal (Settings → Legal, project contracts) ----------
+   Same viewer as a signed contract. The signature sits under the paper and "Sign & continue"
+   lives in the header, disabled until there is a name and a tick. */
+function openSignModal(key){ S.signKey=key; S.signPage=1; S.signName=''; S.signChk=false; drawSignModal(); }
+function drawSignModal(){
+  const c = docCtx(S.signKey);
+  const info = {v:c.version, effective:c.effective, signed:null, current:true};
+  const last = docTotal(c, null), p = S.signPage;
+  const ready = S.signName.trim() && S.signChk;
+  scrim(`<div class="fullview viewer-sign" data-v="sign">
+    <div class="fvbar">
+      <button class="x" onclick="closeScrim()" aria-label="Close"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
+      <span class="vt">${esc(c.title)}</span>
+      <button class="btn pri sm" id="sbtn" ${ready?'':'disabled'} onclick="submitSign()">Sign &amp; continue</button>
+    </div>
+    <div class="fvbody"><div class="fvcard">
+      ${c.resign?`<div class="notice plain vnote">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span><b>You signed this contract on ${fmt(c.lastSigned)}.</b> ${renewalWhy(c)} Nothing in the document has changed.</span></div>`:''}
+      <div class="fvpaper" id="fvpaper"><div class="paperpg">${projectPaper(p, info, c)}</div></div>
+      <div class="pager vpager">
+        <button class="pgb" ${p===1?'disabled':''} onclick="S.signPage=${p-1};drawSignModal()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="11 6 5 12 11 18"/></svg>Prev</button>
+        ${Array.from({length:last},(_,i)=>i+1).map(n=>
+          `<button class="pgn ${n===p?'on':''}" onclick="S.signPage=${n};drawSignModal()">${n}</button>`).join('')}
+        <button class="pgb" ${p===last?'disabled':''} onclick="S.signPage=${p+1};drawSignModal()">Next<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+      <div class="fvsig">
+        <h3>Signature</h3>
+        <div class="fld"><label for="sfn">Full name</label>
+          <input type="text" id="sfn" autocomplete="off" placeholder="Enter full name" value="${esc(S.signName)}"
+                 oninput="S.signName=this.value;syncSign()"></div>
+        <div class="chkrow">
+          <input type="checkbox" id="sck" ${S.signChk?'checked':''} onchange="S.signChk=this.checked;syncSign()">
+          <label for="sck">I have read and accepted the ${esc(c.title)}.</label>
+        </div>
+      </div>
+    </div></div>
+  </div>`);
+}
+const signModalOpen = () => !!document.querySelector('#overlay [data-v="sign"]');
+/* One confirmation wording for every project-contract signature. */
+const signedMsg = (project, title) => `Successfully signed ${esc(project)}'s ${esc(title)}.`;
+
 function submitSign(){
   if(!(S.signName.trim() && S.signChk)) return;
-  const c=docCtx();
+  const modal = signModalOpen();
+  const c=docCtx(modal ? S.signKey : null);
   const wasResign=c.resign;
   const d=PROJECTDOCS.find(x=>x.id===c.key); d.signed=true; d.signedOn=addDays(TODAY,0);
+  /* From the modal: close it and go back to the list, where the row now shows its signed date. */
+  if(modal){
+    S.signKey=null; closeScrim(); render();
+    return toast(signedMsg(c.project, c.title) + (wasResign ? ' Next due in '+c.renewMonths+' months.' : ''));
+  }
   /* Land on the page that was just added, so the agent sees their signed details. */
   if(!c.platform) S.docPage = c.pages+1;
   render();
@@ -1907,17 +2007,28 @@ function applyCtx(key){
 function openDoc(key, after){
   AFTER_SIGN = after || null;
   const d = DOCS[key], c = applyCtx(key);
-  scrim(`<div class="viewer">
-    <div class="vhead">
-      <button class="x" style="position:static" onclick="backFromDoc()" aria-label="Close">
+  /* Same shell as the Settings → Legal sign modal: dark bar, one white card. */
+  scrim(`<div class="fullview" data-v="sign-apply">
+    <div class="fvbar">
+      <button class="x" onclick="backFromDoc()" aria-label="Close">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 5 19 19M19 5 5 19"/></svg></button>
       <span class="vt">${esc(d.title)}</span>
-      <button class="btn pri sm" onclick="signDialog('${key}')">Sign &amp; Continue</button>
+      <button class="btn pri sm" id="cf" disabled onclick="doSign('${key}')">Sign &amp; continue</button>
     </div>
-    <div class="vpaper"><div class="paper">${d.body}
+    <div class="fvbody"><div class="fvcard">
+      <div class="fvpaper"><div class="paperpg">${d.body}
         ${origSig(null)}
-        <p style="text-align:center;color:#9aa8b8;margin:30px 0 0">— Page 1 of ${c.pages} —</p></div>
-    </div>
+        <p style="text-align:center;color:#9aa8b8;margin:30px 0 0">— Page 1 of ${c.pages} —</p></div></div>
+      <div class="fvsig">
+        <h3>Signature</h3>
+        <div class="fld"><label for="fn">Full name</label>
+          <input type="text" id="fn" autocomplete="off" placeholder="Enter full name" oninput="syncConfirm()"></div>
+        <div class="chkrow">
+          <input type="checkbox" id="sgck" onchange="syncConfirm()">
+          <label for="sgck">I have read and accepted the ${esc(d.title)}.</label>
+        </div>
+      </div>
+    </div></div>
   </div>`);
 }
 function backFromDoc(){
@@ -1925,26 +2036,7 @@ function backFromDoc(){
   if(S.openProject) return drawProject();
   closeScrim();
 }
-function signDialog(key){
-  const d = DOCS[key];
-  scrim(`<div class="signbox">
-    <div class="ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="8.5 12.2 11 14.7 15.8 9.6"/></svg></div>
-    <h4>Sign ${esc(d.title)}</h4>
-    <p>Type your full name to sign this contract.</p>
-    <label for="fn">Full name</label>
-    <input type="text" id="fn" autocomplete="off" oninput="syncConfirm()">
-    <div class="chkrow">
-      <input type="checkbox" id="sgck" onchange="syncConfirm()">
-      <label for="sgck">I have read and accepted the ${esc(d.title)}.</label>
-    </div>
-    <div class="row">
-      <button class="btn" onclick="openDoc('${key}',AFTER_SIGN)">Cancel</button>
-      <button class="btn pri" id="cf" disabled onclick="doSign('${key}')">Confirm</button>
-    </div>
-  </div>`);
-  setTimeout(()=>{const f=document.getElementById('fn'); if(f) f.focus();},0);
-}
-/* Same gate as the Legal page: a typed name AND an explicit acceptance. */
+/* Same rule as Settings → Legal: a typed name AND an explicit acceptance. */
 function syncConfirm(){
   const n=document.getElementById('fn'), c=document.getElementById('sgck'), b=document.getElementById('cf');
   if(b) b.disabled = !(n && n.value.trim() && c && c.checked);
@@ -1954,7 +2046,7 @@ function doSign(key){
   if(c && !c.checked) return;
   S.docs[key] = true;
   render();
-  toast(DOCS[key].title+' signed. Contract details added as page '+(applyCtx(key).pages+1)+'.');
+  toast(signedMsg(applyCtx(key).project, DOCS[key].title));
   drawProjectDocs();
 }
 
