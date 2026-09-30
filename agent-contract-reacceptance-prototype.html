@@ -1552,11 +1552,15 @@ const SIGN_UTC = '06:32:08';        // one time of day for every demo signature
    Street; this page would override it — flagged for legal. */
 const COMPANY = {name:'Agents Only Technologies, Inc.', reg:'BC1238861',
   addr:'Suite 201, 128 W Pender St W, Vancouver, BC V6B 1R8, Canada', signatory:'Michael Cole, CEO'};
+/* National ID: every country has one, labelled with that country's document name (NRIC,
+   CCCD, DNI/NIE). Shown MASKED — last digits only — pending legal's call on printing it in full;
+   the full number stays in the agent's profile and the audit trail. */
 /* Only fields a contract actually leaves blank get a row — so Vietnam asks for entity type,
    Malaysia for NRIC, Spain for the arbitration seat, and nobody sees an empty row. */
 const COUNTRIES = {
   vn:{name:'Vietnam', tz:7, tzLabel:'UTC+07:00', entity:'Individual',
       address:'45 Nguyen Hue, Ben Nghe Ward, District 1, Ho Chi Minh City 700000, Vietnam',
+      id:{label:'Citizen Identity Card No. (CCCD)', value:'•••••••••1234'},
       fee:'Per-Minute Pay: VND 1,500 per active minute'},
   my:{name:'Malaysia', tz:8, tzLabel:'UTC+08:00',
       address:'12 Jalan Bukit Bintang, 55100 Kuala Lumpur, Malaysia',
@@ -1564,6 +1568,7 @@ const COUNTRIES = {
       fee:'RM 18.00 per hour'},
   es:{name:'Spain', tz:2, tzLabel:'UTC+02:00',
       address:'Calle de Alcalá 42, 3º B, 28014 Madrid, Spain',
+      id:{label:'DNI / NIE No.', value:'•••••678Z'},
       fee:'$12.00 (USD) per hour',
       seat:'Madrid, Community of Madrid, Spain'}
 };
