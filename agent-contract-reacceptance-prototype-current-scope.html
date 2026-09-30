@@ -524,7 +524,9 @@ body.sched .main::before{content:'';position:absolute;left:0;top:0;bottom:0;widt
 .selpill:hover{background:#f7fafc}
 .selpill svg{width:15px;height:15px;color:var(--ink3);flex:none}
 /* ---------- insights rail ---------- */
-.dashside.plain{background:none;min-height:0;padding:0}
+/* overflow:visible — with no padding, the rounded-card clipping cut the left edge of the
+   bold "R" in the Reliability Metrics title. */
+.dashside.plain{background:none;min-height:0;padding:0;overflow:visible}
 .railttl{font-size:19px;font-weight:700;letter-spacing:-.02em;margin:0 0 4px;display:flex;
   flex-direction:column}
 .railttl .ms{font-size:12px;color:var(--ink3);font-weight:400;margin-top:4px}
@@ -985,6 +987,22 @@ body.sched .main::before{content:'';position:absolute;left:0;top:0;bottom:0;widt
 .xp .xpfoot code{font-family:ui-monospace,Menlo,monospace;font-size:9.3px;color:#4a5a71}
 
 
+/* ---------- locked project: banner + disabled table (replaces the in-page gate) ---------- */
+.pbanner{display:flex;align-items:flex-start;gap:12px;background:#fffcf0;border:1px solid #f4d78b;
+  border-radius:10px;padding:14px 16px;margin:0 0 18px;font-size:13.5px;line-height:1.5;color:#b54708}
+.pbic{color:#dc6803;flex-shrink:0;margin-top:1px;display:grid;place-items:center}
+.pbic svg{width:19px;height:19px}
+.pbtx{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.pbh{font-weight:600;color:#b54708}
+.pbbtn{flex-shrink:0;display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line2);
+  color:var(--ink);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:500;margin-left:12px}
+.pbbtn svg{width:15px;height:15px}
+.pbbtn:hover{background:#f7f9fa}
+.dashlock{opacity:.5;pointer-events:none;user-select:none;filter:grayscale(.35)}
+.projgrp{transition:box-shadow .3s}
+.projgrp.flash{box-shadow:0 0 0 3px var(--amber-line)}
+@media (max-width:640px){.pbanner{flex-wrap:wrap}.pbbtn{margin-left:31px}}
+
 /* ---------- prototype controls: one low pill strip, out of the way ---------- */
 /* Single row, always. Wrapping turned the pill into a blob, so it scrolls instead. */
 /* Above the platform gate. The strip is not part of the product — it is the control panel for
@@ -1086,7 +1104,7 @@ const PLATFORMDOCS = [
    previous:[{v:1, effective:'2025-02-01', signed:'2025-02-03'}]},
   /* Never re-issued: a one-time consent, kept so the Legal tab shows both kinds. */
   {id:'bgc', project:null, title:'Background Check Consent & Criminal History Declaration',
-   version:1, effective:'2025-02-01', pages:3, signed:true, signedOn:'2025-02-03', previous:[]}
+   version:1, effective:'2025-02-01', pages:3, signed:true, signedOn:'2025-02-03', previous:[], step:true}
 ];
 /* Project contracts do not version. A client issues distinct documents — NDA, Statement of
    Work, Data Handling Addendum — and when it needs something more from an agent already on the
@@ -1445,7 +1463,7 @@ function legalHTML(){
 
         <div class="docgroup">
           <h3>Project Contracts</h3>
-          ${projects.map(proj=>`<div class="projgrp">
+          ${projects.map(proj=>`<div class="projgrp" data-proj="${esc(proj)}">
             <div class="projgrp-nm">${esc(proj)}</div>
             ${PROJECTDOCS.filter(d=>d.project===proj).map(d=>`
               <button class="docrow clickable ${d.signed?'':'act'}" onclick="${d.signed?'openSignedDoc':'openLegalDoc'}('${d.id}')">
@@ -1500,7 +1518,9 @@ const COUNTRIES = {
 const ctry = () => COUNTRIES[S.country] || COUNTRIES.my;
 /* A fee blank belongs to the engagement documents, not to an NDA or a data addendum. */
 const hasFee = c => /Statement of Work|Contractor Agreement|Consulting Agreement/.test(c.title);
-const docTotal = (c, signed) => c.pages + (c.project && !c.legacy && signed ? 1 : 0);
+/* Project AND platform contracts get the page on signing (PO, 30 Sep). Not the background
+   check (a step, not a contract) and not anything signed before launch. */
+const docTotal = (c, signed) => c.pages + (!c.legacy && !c.step && signed ? 1 : 0);
 
 function sigStamp(iso){
   const k = ctry();
@@ -1519,7 +1539,7 @@ function execRows(c, signed){
   const k = ctry();
   return [
     {h:'Agreement details', rows:[
-      ['Agreement', c.title], ['Project', c.project], ['Country', k.name],
+      ['Agreement', c.title], c.project && ['Project', c.project], ['Country', k.name],
       ['Effective date', sigStamp(signed).localDate+' ('+k.tzLabel+')'],
       k.seat && ['Arbitration & governing law', k.seat]]},
     {h:'Contractor details', rows:[
@@ -1620,7 +1640,7 @@ function docStamp(c, info){
 }
 /* Project documents are short. Same frame, same signing block, less paper. */
 function projectPaper(n, info, c){
-  if(!c.platform && !c.legacy && info.signed && n===c.pages+1) return execPage(c, info.signed);
+  if(!c.legacy && !c.step && info.signed && n===c.pages+1) return execPage(c, info.signed);
   const stamp = docStamp(c, info);
   const revised = info.current && c.previous && c.previous.length;
   const head = `<div class="aologo"><span class="mark"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
@@ -1662,7 +1682,7 @@ function projectPaper(n, info, c){
   return head + `
     <p class="cl">${n+2}.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FURTHER TERMS</p>
     <p class="ind">Placeholder text standing in for the remaining clauses of this document.</p>
-    ${!c.platform && n===c.pages ? origSig(info.signed) : ''}
+    ${!c.step && n===c.pages ? origSig(info.signed) : ''}
     <p style="text-align:center;color:#9aa8b8;margin-top:40px">— ${stamp?stamp+' · ':''}Page ${n} of ${c.pages} —</p>`;
 }
 /* Which version's terms are on screen. Previous versions really do differ — that is the
@@ -1677,7 +1697,7 @@ function docCtx(key){
     /* `lastSigned` survives an expiry — the signature that ran out is what the renewal notice
        is about, so it cannot be cleared when the document goes back to unsigned. */
     resign:isResign(d), country:d.country, renewMonths:d.renewMonths, lastSigned:d.signedOn,
-    legacy:!!d.legacy,
+    legacy:!!d.legacy, step:!!d.step,
     signedOn: d.signed ? (d.signedOn || addDays(TODAY,0)) : null};
 }
 function verInfo(v){
@@ -2158,16 +2178,17 @@ function projPage(kind){
     ? `<button class="btn pri" ${locked?'disabled':''}
         onclick="toast('Would hand you off to the client platform to work')">Handle Contacts Now</button>`
     : '';
-  const body = locked ? `<div class="pcard gateinline">${gateContent()}</div>`
-    : kind==='dash' ? dashBody() : kind==='insights' ? insightsBody() : coachingBody();
+  /* No gate replacing the page any more (PO, 30 Sep): the page stays, a banner says what is
+     needed, and only Handle Contacts Now and the table are disabled. Everything else — side
+     column, schedule, tasks — shows as usual; those cannot be locked. */
+  const body = kind==='dash' ? dashBody(locked) : kind==='insights' ? insightsBody() : coachingBody();
   /* Dashboard keeps the branded column. Insights puts its reliability metrics in the rail as
      plain cards under a heading, the way the real screen does. Coaching has no rail.
      A locked project has no rail either, whichever page it is. The rail carries that project's
      numbers — star rating, earnings, adherence — so leaving it up beside the gate would publish
      the very figures the gate is there to withhold. The gate covers exactly what it blocks: the
      whole content area, with only the project selector left standing so the agent can move on. */
-  const aside = locked ? ''
-    : kind==='dash'
+  const aside = kind==='dash'
     ? `<aside class="dashside">
          <div class="sidecard"><b>4.2</b><span class="stars">\u2605\u2605\u2605\u2605<span class="dim">\u2605</span></span>
            <div class="sl2">Star Rating</div></div>
@@ -2195,21 +2216,75 @@ function projPage(kind){
          </div>
        </aside>`
     : '';
+  /* Insights: the project header and the banner run the full width, above both the chart and
+     the Reliability Metrics rail (per design). Dashboard and Coaching keep them in the main column. */
+  if(kind==='insights') return `${projHead(p, cta)}
+    ${locked ? projBanner(p) : ''}
+    <div class="dashgrid ${aside?'':'solo'}"><div class="dashmain">${body}</div>${aside}</div>`;
   return `<div class="dashgrid ${aside?'':'solo'}"><div class="dashmain">
     ${kind==='dash'?`<h1 class="hi" style="margin-bottom:18px">Welcome back, Olivia!</h1>`:''}
     ${projHead(p, cta)}
+    ${locked ? projBanner(p) : ''}
     ${body}
   </div>${aside}</div>`;
 }
 function dashHTML(){ return projPage('dash'); }
 
-function dashBody(){
+/* The one message a locked project page carries. It names the project and the count, and its
+   button goes to where contracts are signed: with one contract, straight into its sign modal;
+   with several, Settings → Legal at that project's group. A renewal gets its own sentence. */
+const WARNTRI = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>`;
+const ARROWR = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><polyline points="13 6 19 12 13 18"/></svg>`;
+/* One "Action required" banner, as on Wallet: warning icon, header, one sentence, Review & sign. */
+function actionBanner(msg, act){
+  return `<div class="pbanner" role="status">
+    <span class="pbic">${WARNTRI}</span>
+    <span class="pbtx"><b class="pbh">Action required</b><span>${msg}</span></span>
+    <button class="btn sm pbbtn" onclick="${act}">Review &amp; sign ${ARROWR}</button>
+  </div>`;
+}
+/* Where Review & sign goes: one contract → straight into its sign modal; several → Settings →
+   Legal at that project's group (or the Legal page, when they span projects). */
+const signAct = due => due.length===1 ? `openLegalDoc('${due[0].id}')`
+  : new Set(due.map(d=>d.project)).size===1 ? `goLegalGroup('${esc(due[0].project)}')` : `go('legal')`;
+/* ONE sentence per surface, singular/plural only — new contracts and renewals share it. The
+   wording is neutral about why the contract is there ("has … to sign"), so it stays true for a
+   newly added contract and for an expired signature alike. The sign modal itself still explains a
+   renewal. */
+function projBanner(p){
+  const due = PROJECTDOCS.filter(d=>d.project===p.name && !d.signed);
+  if(!due.length) return '';
+  const msg = due.length===1
+    ? `${esc(p.name)} has a contract for you to sign. You must sign it before you can keep working on this project.`
+    : `${esc(p.name)} has ${due.length} contracts for you to sign. You must sign them before you can keep working on this project.`;
+  return actionBanner(msg, signAct(due));
+}
+/* Earnings: not about one project, so it names the project (or counts them). */
+function walletBanner(){
+  const due = PROJECTDOCS.filter(d=>!d.signed);
+  if(!due.length) return '';
+  const projects = [...new Set(due.map(d=>d.project))];
+  const msg = projects.length>1
+    ? `You have ${due.length} contracts ready for signature across ${projects.length} projects. You must sign them before you can access those projects.`
+    : due.length===1
+      ? `Your contract for ${esc(projects[0])} is ready for signature. You must sign it before you can access the project.`
+      : `Your ${due.length} contracts for ${esc(projects[0])} are ready for signature. You must sign them before you can access the project.`;
+  return actionBanner(msg, signAct(due));
+}
+function goLegalGroup(name){
+  go('legal');
+  const g = [...document.querySelectorAll('.projgrp')].find(x=>x.dataset.proj===name);
+  if(g){ g.scrollIntoView && g.scrollIntoView({behavior:'smooth',block:'start'});
+         g.classList.add('flash'); setTimeout(()=>g.classList.remove('flash'),1600); }
+}
+
+function dashBody(locked){
   return `<div class="metrics">
       ${[['30','Ticket Closure','Project average 50'],['3.8','Resolution','Project average 3.86'],
          ['3.55','Agent CSAT','Project average 3.59']].map(([n,l,sub])=>`
         <div class="metric"><b>${n}</b><div class="ml">${l}</div><div class="ms">${sub}</div></div>`).join('')}
     </div>
-    <div class="pcard" style="margin-top:22px">
+    <div class="pcard ${locked?'dashlock':''}" style="margin-top:22px" ${locked?'aria-disabled="true"':''}>
       <div class="subtabs"><button class="subtab on">Contact History</button>
         <button class="subtab" onclick="toast('Not part of this prototype')">Invoices</button>
         <button class="subtab" onclick="toast('Not part of this prototype')">Pay Details</button></div>
@@ -2408,14 +2483,6 @@ const WICON = {
    the part the widget cannot say — what an unsigned contract has to do with the number above.
    It is the PO's V2 framing: it states the money is held, which is only true once project
    deposits are actually blocked. That is still open. */
-function walNoteHTML(){
-  const due = PROJECTDOCS.filter(d=>!d.signed);
-  if(!due.length) return '';
-  const projects = [...new Set(due.map(d=>d.project))];
-  return `<p class="wdnote">${projects.length===1
-    ? `Your ${esc(projects[0])} earnings are on hold until you sign the contract.`
-    : `Some of your earnings are on hold until you sign your outstanding contracts.`}</p>`;
-}
 
 const TX = [
   ['Aug 8, 2024','Referral Deposited','dep','Referral Commission','153456789','+ $50.00','pos'],
@@ -2453,9 +2520,10 @@ function walletHTML(){
           <label class="wdlab" for="wdamt">Amount</label>
           <input id="wdamt" class="wdinput" type="text" value="$50" autocomplete="off">
           <button class="btn pri wide" onclick="toast('Would start a withdrawal')">Withdraw</button>
-          ${walNoteHTML()}
         </div>
       </div>
+      ${/* The "earnings on hold" note is gone: devs cannot hold earnings per project (PO). */''}
+      ${walletBanner()}
       <div class="pcard txcard">
         <h3 class="txttl">Transaction history</h3>
         <table class="txtbl"><thead><tr><th>Date</th><th>Status</th><th>Detail</th><th>Earnings</th></tr></thead>
@@ -2816,7 +2884,7 @@ const NAVITEMS = [
   {ic:'calendar',    lbl:'Schedule', view:'schedule'},
   {ic:'trending-up', lbl:'Insights', view:'insights'},
   {ic:'rocket',      lbl:'Coaching', view:'coaching'},
-  {ic:'dollar-sign', lbl:'Wallet', view:'wallet'},
+  {ic:'dollar-sign', lbl:'Earnings', view:'wallet'},
   {ic:'user-plus',   lbl:'Referrals', view:'referrals'}
 ];
 const ACCTMENU = [
@@ -3131,10 +3199,23 @@ function toggleBankTax(){ S.bankTax=!S.bankTax; refresh(); }
       there costs almost no reach. Schedule sits between the two: it defaults to My Shifts, which
       is everything, but can be filtered down to one project.
    Bank & tax is account-level, so it is in scope wherever the widget runs at all. */
+/* ⚠ WHEN THE FLOATING WIDGET SHIPS — banner vs widget (decided 30 Sep 2026)
+   The widget is NOT in the current sprint; the "Action required" banner is. Once the widget is
+   built, REMOVE the banner from Earnings. Rule: one reminder per screen —
+     · banner  = "this page is affected" → only where something is locked (project Dashboard,
+                 Insights, Coaching: Handle Contacts + table disabled);
+     · widget  = "your to-do list"       → portal-wide pages (Home, Earnings, Referrals, Schedule).
+   Earnings only has the banner now because the widget isn't built and the "earnings on hold"
+   note was dropped (devs can't hold earnings). Rejected alternative: keep both on Earnings and
+   strip contract items from the widget there — two reminder styles on one page, and a widget
+   whose list changes per page. See decisions-log.md in this folder. */
 function widgetHidden(){
   if(platformBlocked()) return true;                  // portal sealed — Settings is unreachable
   if(S.view==='legal' || S.view==='doc') return true; // already looking at the contracts
-  if(PROJPAGES[S.view]) return true;                  // one project, and its gate already speaks
+  if(PROJPAGES[S.view]) return true;                  // one project, and its banner already speaks
+  /* Wallet carries the same Action required banner, so the widget would say it twice — unless
+     there is account-level business (bank & tax) that the banner does not cover. */
+  if(S.view==='wallet' && S.bankTax && PROJECTDOCS.some(d=>!d.signed)) return true;
   if(S.view==='schedule' && S.schProj){
     /* Filtered to a single project. Show only if that project is the one waiting on a
        signature — or if there is account-level business, which is in scope regardless. */
