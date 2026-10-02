@@ -791,6 +791,8 @@ h1.hi{font-size:27px;font-weight:700;letter-spacing:-.02em;margin:0 0 20px}
   color:var(--ink);border-radius:8px;padding:7px 12px;font-size:13px;font-weight:500;margin-left:12px}
 .pbbtn svg{width:15px;height:15px}
 .pbbtn:hover{background:#f7f9fa}
+.subtab:disabled,.selpill:disabled{opacity:.45;cursor:not-allowed}
+.subtab:disabled:hover{color:inherit}.selpill:disabled:hover{background:#fff}
 .dashlock{opacity:.5;pointer-events:none;user-select:none;filter:grayscale(.35)}
 .projgrp{transition:box-shadow .3s}
 .projgrp.flash{box-shadow:0 0 0 3px var(--amber-line)}
@@ -1553,22 +1555,22 @@ const SIGN_UTC = '06:32:08';        // one time of day for every demo signature
 const COMPANY = {name:'Agents Only Technologies, Inc.', reg:'BC1238861',
   addr:'Suite 201, 128 W Pender St W, Vancouver, BC V6B 1R8, Canada', signatory:'Michael Cole, CEO'};
 /* National ID: every country has one, labelled with that country's document name (NRIC,
-   CCCD, DNI/NIE). Shown MASKED — last digits only — pending legal's call on printing it in full;
-   the full number stays in the agent's profile and the audit trail. */
+   CCCD, DNI/NIE). Shown IN FULL — the PO confirmed (2 Oct 2026) it doesn't need masking on
+   this page. Sample numbers only. */
 /* Only fields a contract actually leaves blank get a row — so Vietnam asks for entity type,
    Malaysia for NRIC, Spain for the arbitration seat, and nobody sees an empty row. */
 const COUNTRIES = {
   vn:{name:'Vietnam', tz:7, tzLabel:'UTC+07:00', entity:'Individual',
       address:'45 Nguyen Hue, Ben Nghe Ward, District 1, Ho Chi Minh City 700000, Vietnam',
-      id:{label:'Citizen Identity Card No. (CCCD)', value:'•••••••••1234'},
+      id:{label:'Citizen Identity Card No. (CCCD)', value:'079201001234'},
       fee:'Per-Minute Pay: VND 1,500 per active minute'},
   my:{name:'Malaysia', tz:8, tzLabel:'UTC+08:00',
       address:'12 Jalan Bukit Bintang, 55100 Kuala Lumpur, Malaysia',
-      id:{label:'NRIC No.', value:'••••••-••-5678'},
+      id:{label:'NRIC No.', value:'900101-14-5678'},
       fee:'RM 18.00 per hour'},
   es:{name:'Spain', tz:2, tzLabel:'UTC+02:00',
       address:'Calle de Alcalá 42, 3º B, 28014 Madrid, Spain',
-      id:{label:'DNI / NIE No.', value:'•••••678Z'},
+      id:{label:'DNI / NIE No.', value:'12345678Z'},
       fee:'$12.00 (USD) per hour',
       seat:'Madrid, Community of Madrid, Spain'}
 };
@@ -3397,6 +3399,13 @@ function render(){
   document.getElementById('guide').innerHTML = wh ? '' : guideHTML();
   document.body.classList.toggle('haswidget', !wh && !!guideItems().filter(i=>!i.done).length);
   document.body.classList.toggle('sched', S.view==='schedule');  // schedule grid needs footer room
+  /* Locked project page (PO, 2 Oct): the content stays visible, but the controls inside the page
+     are disabled too — Insights' metric tabs and period selector, the leaderboard period,
+     Coaching's date/filters, the Dashboard's sub-tabs. The project switcher and the banner's
+     Review & sign stay live. */
+  const lp = PROJPAGES[S.view] && JOINED.find(x=>x.id===S.dashProject);
+  if(lp && projLocked(lp.name))
+    document.querySelectorAll('#view .subtab, #view .selpill').forEach(b=>{ b.disabled=true; b.removeAttribute('onclick'); });
   document.getElementById('strip').innerHTML = stripHTML();
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape' && !platformBlocked())closeScrim();});
